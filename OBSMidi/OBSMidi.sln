@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OBSMidi", "OBSMidi\OBSMidi.csproj", "{A09AE527-A7D9-4818-A41C-3474CB8599D9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A09AE527-A7D9-4818-A41C-3474CB8599D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A09AE527-A7D9-4818-A41C-3474CB8599D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A09AE527-A7D9-4818-A41C-3474CB8599D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A09AE527-A7D9-4818-A41C-3474CB8599D9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8B684F39-FBEC-49C1-8F48-44FDB47E2845}
+	EndGlobalSection
+EndGlobal
