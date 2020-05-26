@@ -23,6 +23,7 @@ namespace nanoKontrol2OBS
         private readonly OBSConnector obsSocket;
         private readonly Controller nanoController;
         private Dictionary<_specialSourceType, SpecialSource> specialSources;
+        private string[] obsScenes;
 
         public Kontrol2OBS(string url, string password)
         {
@@ -67,14 +68,13 @@ namespace nanoKontrol2OBS
 
         private void OnOBSSceneSwitched(object sender, OBSConnector.OBSSceneSwitchedEventArgs e)
         {
-            string[] scenes = this.obsSocket.GetSceneList();
             string currentScene = e.newSceneName;
-            for (byte soloButtonIndex = 0; soloButtonIndex < scenes.Length && soloButtonIndex < 8;)
+            for (byte soloButtonIndex = 0; soloButtonIndex < this.obsScenes.Length && soloButtonIndex < 8; soloButtonIndex++)
             {
-                if (currentScene.Equals(scenes[soloButtonIndex]))
-                    this.nanoController.ToggleLED(GroupControls.solo, ++soloButtonIndex, true);
+                if (currentScene.Equals(this.obsScenes[soloButtonIndex]))
+                    this.nanoController.ToggleLED(GroupControls.solo, soloButtonIndex, true);
                 else
-                    this.nanoController.ToggleLED(GroupControls.solo, ++soloButtonIndex, false);
+                    this.nanoController.ToggleLED(GroupControls.solo, soloButtonIndex, false);
             }
         }
 
@@ -154,11 +154,11 @@ namespace nanoKontrol2OBS
 
         private void SetupNanoController()
         {
-            string[] scenes = this.obsSocket.GetSceneList();
+            this.obsScenes = this.obsSocket.GetSceneList();
             string currentScene = this.obsSocket.GetCurrentScene();
-            for(byte soloButtonIndex = 0; soloButtonIndex < scenes.Length && soloButtonIndex < 8; soloButtonIndex++)
+            for(byte soloButtonIndex = 0; soloButtonIndex < this.obsScenes.Length && soloButtonIndex < 8; soloButtonIndex++)
             {
-                if (currentScene.Equals(scenes[soloButtonIndex]))
+                if (currentScene.Equals(this.obsScenes[soloButtonIndex]))
                     this.nanoController.ToggleLED(GroupControls.solo, soloButtonIndex, true);
                 else
                     this.nanoController.ToggleLED(GroupControls.solo, soloButtonIndex, false);
@@ -265,9 +265,6 @@ namespace nanoKontrol2OBS
                     break;
                 case 45:
                     if (e.value == 127) this.obsSocket.SaveReplayBuffer();
-                    break;
-                default:
-                    Console.WriteLine("Control {0} not bound.", e.control);
                     break;
             }
             //Solo
