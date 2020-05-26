@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OBSMidi", "OBSMidi\OBSMidi.csproj", "{A09AE527-A7D9-4818-A41C-3474CB8599D9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MidiAccess", "MidiAccess\MidiAccess.csproj", "{76B89794-80C9-4376-B829-DE564158E476}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsSoundControl", "WindowsSoundControl\WindowsSoundControl.csproj", "{12284FAB-2FAE-4B51-ABCB-778AEFADA87E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nanoKontrol2OBS", "nanoKontrol2OBS\nanoKontrol2OBS.csproj", "{345D230D-1414-458A-B0F4-DCA243AAEB48}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +15,18 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A09AE527-A7D9-4818-A41C-3474CB8599D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A09AE527-A7D9-4818-A41C-3474CB8599D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A09AE527-A7D9-4818-A41C-3474CB8599D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A09AE527-A7D9-4818-A41C-3474CB8599D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76B89794-80C9-4376-B829-DE564158E476}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76B89794-80C9-4376-B829-DE564158E476}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76B89794-80C9-4376-B829-DE564158E476}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76B89794-80C9-4376-B829-DE564158E476}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12284FAB-2FAE-4B51-ABCB-778AEFADA87E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12284FAB-2FAE-4B51-ABCB-778AEFADA87E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12284FAB-2FAE-4B51-ABCB-778AEFADA87E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12284FAB-2FAE-4B51-ABCB-778AEFADA87E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{345D230D-1414-458A-B0F4-DCA243AAEB48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{345D230D-1414-458A-B0F4-DCA243AAEB48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{345D230D-1414-458A-B0F4-DCA243AAEB48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{345D230D-1414-458A-B0F4-DCA243AAEB48}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

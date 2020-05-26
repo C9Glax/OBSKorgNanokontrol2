@@ -72,37 +72,37 @@ namespace OBSMidi
         private void SetupAudioDevices()
         {
             Console.WriteLine("Setting-Up Audio Devices (This might take a while)");
-            string guiddesktop1 = (string)this.obs.GetSourceSettings(this.specialSources.sources[SpecialSources.sourceType.desktop1])["sourceSettings"]["device_id"];
-            string guiddesktop2 = (string)this.obs.GetSourceSettings(this.specialSources.sources[SpecialSources.sourceType.desktop2])["sourceSettings"]["device_id"];
-            string guidmic1 = (string)this.obs.GetSourceSettings(this.specialSources.sources[SpecialSources.sourceType.mic1])["sourceSettings"]["device_id"];
-            string guidmic2 = (string)this.obs.GetSourceSettings(this.specialSources.sources[SpecialSources.sourceType.mic2])["sourceSettings"]["device_id"];
-            string guidmic3 = (string)this.obs.GetSourceSettings(this.specialSources.sources[SpecialSources.sourceType.mic3])["sourceSettings"]["device_id"];
+            string guiddesktop1 = (string)this.obs.GetSourceSettings(this.specialSources.sources[_specialSourceType.desktop1])["sourceSettings"]["device_id"];
+            string guiddesktop2 = (string)this.obs.GetSourceSettings(this.specialSources.sources[_specialSourceType.desktop2])["sourceSettings"]["device_id"];
+            string guidmic1 = (string)this.obs.GetSourceSettings(this.specialSources.sources[_specialSourceType.mic1])["sourceSettings"]["device_id"];
+            string guidmic2 = (string)this.obs.GetSourceSettings(this.specialSources.sources[_specialSourceType.mic2])["sourceSettings"]["device_id"];
+            string guidmic3 = (string)this.obs.GetSourceSettings(this.specialSources.sources[_specialSourceType.mic3])["sourceSettings"]["device_id"];
             this.audioDevices = new Dictionary<string, CoreAudioDevice>();
             foreach (CoreAudioDevice audioDevice in new CoreAudioController().GetDevices(AudioSwitcher.AudioApi.DeviceState.Active))
             {
                 if (audioDevice.RealId == guiddesktop1)
                 {
-                    this.audioDevices.Add(this.specialSources.sources[SpecialSources.sourceType.desktop1], audioDevice);
+                    this.audioDevices.Add(this.specialSources.sources[_specialSourceType.desktop1], audioDevice);
                     this.LEDStatus(48, audioDevice.IsMuted);
                 }
                 else if (audioDevice.RealId == guiddesktop2)
                 {
-                    this.audioDevices.Add(this.specialSources.sources[SpecialSources.sourceType.desktop2], audioDevice);
+                    this.audioDevices.Add(this.specialSources.sources[_specialSourceType.desktop2], audioDevice);
                     this.LEDStatus(49, audioDevice.IsMuted);
                 }
                 else if (audioDevice.RealId == guidmic1)
                 {
-                    this.audioDevices.Add(this.specialSources.sources[SpecialSources.sourceType.mic1], audioDevice);
+                    this.audioDevices.Add(this.specialSources.sources[_specialSourceType.mic1], audioDevice);
                     this.LEDStatus(50, audioDevice.IsMuted);
                 }
                 else if (audioDevice.RealId == guidmic2)
                 {
-                    this.audioDevices.Add(this.specialSources.sources[SpecialSources.sourceType.mic2], audioDevice);
+                    this.audioDevices.Add(this.specialSources.sources[_specialSourceType.mic2], audioDevice);
                     this.LEDStatus(51, audioDevice.IsMuted);
                 }
                 else if (audioDevice.RealId == guidmic3)
                 {
-                    this.audioDevices.Add(this.specialSources.sources[SpecialSources.sourceType.mic3], audioDevice);
+                    this.audioDevices.Add(this.specialSources.sources[_specialSourceType.mic3], audioDevice);
                     this.LEDStatus(52, audioDevice.IsMuted);
                 }
             }
@@ -131,15 +131,15 @@ namespace OBSMidi
 
         private void OnOBSSourceMuteStateChanged(object sender, OBSConnector.OBSSourceMuteStateChangedEventArgs e)
         {
-            if(e.sourcename == this.specialSources.sources[SpecialSources.sourceType.desktop1])
+            if(e.sourcename == this.specialSources.sources[_specialSourceType.desktop1])
                 this.LEDStatus(64, !e.muted);
-            else if (e.sourcename == this.specialSources.sources[SpecialSources.sourceType.desktop2])
+            else if (e.sourcename == this.specialSources.sources[_specialSourceType.desktop2])
                 this.LEDStatus(65, !e.muted);
-            else if (e.sourcename == this.specialSources.sources[SpecialSources.sourceType.mic1])
+            else if (e.sourcename == this.specialSources.sources[_specialSourceType.mic1])
                 this.LEDStatus(66, !e.muted);
-            else if (e.sourcename == this.specialSources.sources[SpecialSources.sourceType.mic2])
+            else if (e.sourcename == this.specialSources.sources[_specialSourceType.mic2])
                 this.LEDStatus(67, !e.muted);
-            else if (e.sourcename == this.specialSources.sources[SpecialSources.sourceType.mic3])
+            else if (e.sourcename == this.specialSources.sources[_specialSourceType.mic3])
                 this.LEDStatus(68, !e.muted);
         }
 
@@ -157,11 +157,11 @@ namespace OBSMidi
                 this.LEDStatus(Convert.ToByte(scenceIndex + 32), currentScene == this.scenes[scenceIndex]);
 
             this.specialSources = obs.GetSpecialSources();
-            this.LEDStatus(64, !obs.GetMute(this.specialSources.sources[SpecialSources.sourceType.desktop1]));
-            this.LEDStatus(65, !obs.GetMute(this.specialSources.sources[SpecialSources.sourceType.desktop2]));
-            this.LEDStatus(66, !obs.GetMute(this.specialSources.sources[SpecialSources.sourceType.mic1]));
-            this.LEDStatus(67, !obs.GetMute(this.specialSources.sources[SpecialSources.sourceType.mic2]));
-            this.LEDStatus(68, !obs.GetMute(this.specialSources.sources[SpecialSources.sourceType.mic3]));
+            this.LEDStatus(64, !obs.GetMute(this.specialSources.sources[_specialSourceType.desktop1]));
+            this.LEDStatus(65, !obs.GetMute(this.specialSources.sources[_specialSourceType.desktop2]));
+            this.LEDStatus(66, !obs.GetMute(this.specialSources.sources[_specialSourceType.mic1]));
+            this.LEDStatus(67, !obs.GetMute(this.specialSources.sources[_specialSourceType.mic2]));
+            this.LEDStatus(68, !obs.GetMute(this.specialSources.sources[_specialSourceType.mic3]));
 
             StreamingStatus stats = this.obs.GetStreamingStatus();
             this.LEDStatus(45, stats.recording);
@@ -184,43 +184,43 @@ namespace OBSMidi
             Console.ForegroundColor = ConsoleColor.White;
             if(control == 0) //Volume
             {
-                obs.SetVolume(this.specialSources.sources[SpecialSources.sourceType.desktop1], Convert.ToDouble(value).Map(0, 127, 0, 1));
+                obs.SetVolume(this.specialSources.sources[_specialSourceType.desktop1], Convert.ToDouble(value).Map(0, 127, 0, 1));
             }
             else if (control == 1) //Volume
             {
-                obs.SetVolume(this.specialSources.sources[SpecialSources.sourceType.desktop2], Convert.ToDouble(value).Map(0, 127, 0, 1));
+                obs.SetVolume(this.specialSources.sources[_specialSourceType.desktop2], Convert.ToDouble(value).Map(0, 127, 0, 1));
             }
             else if (control == 2) //Volume
             {
-                obs.SetVolume(this.specialSources.sources[SpecialSources.sourceType.mic1], Convert.ToDouble(value).Map(0, 127, 0, 1));
+                obs.SetVolume(this.specialSources.sources[_specialSourceType.mic1], Convert.ToDouble(value).Map(0, 127, 0, 1));
             }
             else if (control == 3) //Volume
             {
-                obs.SetVolume(this.specialSources.sources[SpecialSources.sourceType.mic2], Convert.ToDouble(value).Map(0, 127, 0, 1));
+                obs.SetVolume(this.specialSources.sources[_specialSourceType.mic2], Convert.ToDouble(value).Map(0, 127, 0, 1));
             }
             else if (control == 4) //Volume
             {
-                obs.SetVolume(this.specialSources.sources[SpecialSources.sourceType.mic3], Convert.ToDouble(value).Map(0, 127, 0, 1));
+                obs.SetVolume(this.specialSources.sources[_specialSourceType.mic3], Convert.ToDouble(value).Map(0, 127, 0, 1));
             }
             else if(control == 16) //Dial
             {
-                this.audioDevices[this.specialSources.sources[SpecialSources.sourceType.desktop1]].Volume = Convert.ToDouble(value).Map(0, 127, 0, 100);
+                this.audioDevices[this.specialSources.sources[_specialSourceType.desktop1]].Volume = Convert.ToDouble(value).Map(0, 127, 0, 100);
             }
             else if (control == 17) //Dial
             {
-                this.audioDevices[this.specialSources.sources[SpecialSources.sourceType.desktop2]].Volume = Convert.ToDouble(value).Map(0, 127, 0, 100);
+                this.audioDevices[this.specialSources.sources[_specialSourceType.desktop2]].Volume = Convert.ToDouble(value).Map(0, 127, 0, 100);
             }
             else if (control == 18) //Dial
             {
-                this.audioDevices[this.specialSources.sources[SpecialSources.sourceType.mic1]].Volume = Convert.ToDouble(value).Map(0, 127, 0, 100);
+                this.audioDevices[this.specialSources.sources[_specialSourceType.mic1]].Volume = Convert.ToDouble(value).Map(0, 127, 0, 100);
             }
             else if (control == 19) //Dial
             {
-                this.audioDevices[this.specialSources.sources[SpecialSources.sourceType.mic2]].Volume = Convert.ToDouble(value).Map(0, 127, 0, 100);
+                this.audioDevices[this.specialSources.sources[_specialSourceType.mic2]].Volume = Convert.ToDouble(value).Map(0, 127, 0, 100);
             }
             else if (control == 20) //Dial
             {
-                this.audioDevices[this.specialSources.sources[SpecialSources.sourceType.mic3]].Volume = Convert.ToDouble(value).Map(0, 127, 0, 100);
+                this.audioDevices[this.specialSources.sources[_specialSourceType.mic3]].Volume = Convert.ToDouble(value).Map(0, 127, 0, 100);
             }
             else if (control >= 32 && control <= 39) //Solo
             {
@@ -230,48 +230,48 @@ namespace OBSMidi
             }
             else if (control == 48) //Mute
             {
-                this.audioDevices[this.specialSources.sources[SpecialSources.sourceType.desktop1]].Mute(value == 127);
+                this.audioDevices[this.specialSources.sources[_specialSourceType.desktop1]].Mute(value == 127);
                 this.LEDStatus(control, value == 127);
             }
             else if (control == 49) //Mute
             {
-                this.audioDevices[this.specialSources.sources[SpecialSources.sourceType.desktop2]].Mute(value == 127);
+                this.audioDevices[this.specialSources.sources[_specialSourceType.desktop2]].Mute(value == 127);
                 this.LEDStatus(control, value == 127);
             }
             else if (control == 50) //Mute
             {
-                this.audioDevices[this.specialSources.sources[SpecialSources.sourceType.mic1]].Mute(value == 127);
+                this.audioDevices[this.specialSources.sources[_specialSourceType.mic1]].Mute(value == 127);
                 this.LEDStatus(control, value == 127);
             }
             else if (control == 51) //Mute
             {
-                this.audioDevices[this.specialSources.sources[SpecialSources.sourceType.mic2]].Mute(value == 127);
+                this.audioDevices[this.specialSources.sources[_specialSourceType.mic2]].Mute(value == 127);
                 this.LEDStatus(control, value == 127);
             }
             else if (control == 52) //Mute
             {
-                this.audioDevices[this.specialSources.sources[SpecialSources.sourceType.mic3]].Mute(value == 127);
+                this.audioDevices[this.specialSources.sources[_specialSourceType.mic3]].Mute(value == 127);
                 this.LEDStatus(control, value == 127);
             }
             else if (control == 64) //R
             {
-                obs.SetMute(this.specialSources.sources[SpecialSources.sourceType.desktop1], value == 127);
+                obs.SetMute(this.specialSources.sources[_specialSourceType.desktop1], value == 127);
             }
             else if (control == 65) //R
             {
-                obs.SetMute(this.specialSources.sources[SpecialSources.sourceType.desktop2], value == 127);
+                obs.SetMute(this.specialSources.sources[_specialSourceType.desktop2], value == 127);
             }
             else if (control == 66) //R
             {
-                obs.SetMute(this.specialSources.sources[SpecialSources.sourceType.mic1], value == 127);
+                obs.SetMute(this.specialSources.sources[_specialSourceType.mic1], value == 127);
             }
             else if (control == 67) //R
             {
-                obs.SetMute(this.specialSources.sources[SpecialSources.sourceType.mic2], value == 127);
+                obs.SetMute(this.specialSources.sources[_specialSourceType.mic2], value == 127);
             }
             else if (control == 68) //R
             {
-                obs.SetMute(this.specialSources.sources[SpecialSources.sourceType.mic3], value == 127);
+                obs.SetMute(this.specialSources.sources[_specialSourceType.mic3], value == 127);
             }
             else if (control == 41 && value == 127) //Play
             {
