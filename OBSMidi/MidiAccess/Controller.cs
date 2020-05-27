@@ -16,6 +16,12 @@ namespace MidiAccess
             this.midiOut = MidiInformation.GetOutputDeviceWithName(outputDeviceName);
         }
 
+        public void Dispose()
+        {
+            this.midiIn.Dispose();
+            this.midiOut.Dispose();
+        }
+
         private void MessageReceived(object sender, MidiInMessageEventArgs eventArgs)
         {
             byte[] message = BitConverter.GetBytes(eventArgs.RawMessage);
