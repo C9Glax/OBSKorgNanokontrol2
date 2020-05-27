@@ -61,12 +61,12 @@ namespace nanoKontrol2OBS
 
         public void Dispose()
         {
+            for (byte cc = 16; cc < 70; cc++)
+                this.nanoController.ToggleLED(cc, false);
             this.obsSocket.Close();
             foreach (SpecialSource specialSource in this.specialSources.Values)
                 specialSource.windowsDevice.Dispose();
             this.nanoController.Dispose();
-            for (byte cc = 16; cc < 70; cc++)
-                this.nanoController.ToggleLED(cc, false);
         }
 
         private void SetupOBSEventHandlers()
