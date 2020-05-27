@@ -10,14 +10,9 @@ namespace WindowsSoundControl
         private readonly MuteObserver muteObserver;
         private DateTime lastAction;
 
-        public AudioDevice(string pid)
+        public AudioDevice(string guid)
         {
-            foreach (CoreAudioDevice device in new CoreAudioController().GetDevices(DeviceState.Active))
-                if (device.RealId.Equals(pid))
-                {
-                    this.device = device;
-                    break;
-                }
+            this.device = new CoreAudioController().GetDevice(Guid.Parse(guid));
 
             this.muteObserver = new MuteObserver(this);
             this.muteObserver.Subscribe(this.device.MuteChanged);
@@ -89,7 +84,6 @@ namespace WindowsSoundControl
             public void OnCompleted()
             {
                 this.Unsubscribe();
-                throw new NotImplementedException();
             }
 
             public void OnError(Exception error)

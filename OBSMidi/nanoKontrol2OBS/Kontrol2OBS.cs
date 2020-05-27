@@ -105,31 +105,35 @@ namespace nanoKontrol2OBS
                 {
                     _specialSourceType.desktop1, new SpecialSource(_specialSourceType.desktop1) {
                         obsSourceName = obsSpecialSources.sources[_specialSourceType.desktop1],
-                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.sources[_specialSourceType.desktop1]))
+                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.sources[_specialSourceType.desktop1]).Split('}')[1].Substring(2))
                     }
                 },{
                     _specialSourceType.desktop2, new SpecialSource(_specialSourceType.desktop2) {
                         obsSourceName = obsSpecialSources.sources[_specialSourceType.desktop2],
-                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.sources[_specialSourceType.desktop2]))
+                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.sources[_specialSourceType.desktop2]).Split('}')[1].Substring(2))
                     }
                 },{
                     _specialSourceType.mic1, new SpecialSource(_specialSourceType.mic1) {
                         obsSourceName = obsSpecialSources.sources[_specialSourceType.mic1],
-                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.sources[_specialSourceType.mic1]))
+                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.sources[_specialSourceType.mic1]).Split('}')[1].Substring(2))
                     }
                 },{
                     _specialSourceType.mic2, new SpecialSource(_specialSourceType.mic2) {
                         obsSourceName = obsSpecialSources.sources[_specialSourceType.mic2],
-                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.sources[_specialSourceType.mic2]))
+                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.sources[_specialSourceType.mic2]).Split('}')[1].Substring(2))
                     }
                 },{
                     _specialSourceType.mic3, new SpecialSource(_specialSourceType.mic3) {
                         obsSourceName = obsSpecialSources.sources[_specialSourceType.mic3],
-                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.sources[_specialSourceType.mic3]))
+                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.sources[_specialSourceType.mic3]).Split('}')[1].Substring(2))
                     }
                 }
             };
             this.specialSources[_specialSourceType.desktop1].windowsDevice.OnMuteStateChanged += WindowsDevice_OnMuteStateChanged;
+            this.specialSources[_specialSourceType.desktop2].windowsDevice.OnMuteStateChanged += WindowsDevice_OnMuteStateChanged;
+            this.specialSources[_specialSourceType.mic1].windowsDevice.OnMuteStateChanged += WindowsDevice_OnMuteStateChanged;
+            this.specialSources[_specialSourceType.mic2].windowsDevice.OnMuteStateChanged += WindowsDevice_OnMuteStateChanged;
+            this.specialSources[_specialSourceType.mic3].windowsDevice.OnMuteStateChanged += WindowsDevice_OnMuteStateChanged;
         }
 
         private void WindowsDevice_OnMuteStateChanged(object sender, AudioDevice.OnMuteStateChangedEventArgs e)
