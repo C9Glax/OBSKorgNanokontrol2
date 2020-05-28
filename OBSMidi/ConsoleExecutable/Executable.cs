@@ -9,9 +9,10 @@ namespace ConsoleExecutable
         public Executable(string url, string password)
         {
             Kontrol2OBS control = new Kontrol2OBS(url, password);
-            control.OnLoggingEvent += (s, e) => { Console.WriteLine(e.text); };
+            control.OnStatusLog += (s, e) => { Console.WriteLine(e.text); };
             control.Create();
 
+            Console.WriteLine("Press Escape for clean shutdown.");
             while (Console.ReadKey().Key != ConsoleKey.Escape) ;
             control.Dispose();
         }
@@ -20,11 +21,11 @@ namespace ConsoleExecutable
         {
             if (args.Length == 0)
             {
-                Console.WriteLine("IP:");
+                Console.WriteLine("obs-websocket address (Press enter for 127.0.0.1:4444):");
                 string ip = Console.ReadLine();
                 Console.WriteLine("Password (Press Enter if none):");
                 string password = Console.ReadLine();
-                new Executable(ip, password);
+                new Executable((ip == "") ? "127.0.0.1:4444" : ip, password);
             }
             else if (args.Length == 1)
                 new Executable(args[0], "");
