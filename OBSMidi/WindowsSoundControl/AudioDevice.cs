@@ -9,6 +9,7 @@ namespace WindowsSoundControl
         private readonly CoreAudioDevice device;
         private readonly MuteObserver muteObserver;
         private DateTime lastAction;
+        private int maxDeviceActionsPerSecond = 50;
 
         public AudioDevice(string guid)
         {
@@ -23,13 +24,11 @@ namespace WindowsSoundControl
         public void ToggleMute()
         {
             double timeelapsed = DateTime.Now.Subtract(this.lastAction).TotalMilliseconds;
-            if (timeelapsed < 50)
+            if(timeelapsed > 1000 / this.maxDeviceActionsPerSecond)
             {
-                Console.WriteLine("Too many actions for AudioDevice. {0}", timeelapsed);
-                return;
+                this.lastAction = DateTime.Now;
+                this.device.Mute(!this.device.IsMuted);
             }
-            this.lastAction = DateTime.Now;
-            this.device.Mute(!this.device.IsMuted);
         }
 
         public bool IsMuted()
@@ -40,13 +39,11 @@ namespace WindowsSoundControl
         public void SetVolume(double volume)
         {
             double timeelapsed = DateTime.Now.Subtract(this.lastAction).TotalMilliseconds;
-            if (timeelapsed < 10)
+            if (timeelapsed > 1000 / this.maxDeviceActionsPerSecond)
             {
-                Console.WriteLine("Too many actions for AudioDevice. {0}", timeelapsed);
-                return;
+                this.lastAction = DateTime.Now;
+                this.device.Volume = volume;
             }
-            this.lastAction = DateTime.Now;
-            this.device.Volume = volume;
         }
 
         public void Dispose()
