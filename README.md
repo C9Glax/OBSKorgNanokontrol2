@@ -17,6 +17,7 @@ A working [obs-websocket](https://github.com/Palakis/obs-websocket) installation
 * [AudioSwitcher](https://github.com/xenolightning/AudioSwitcher) - Windows Audio Controls
 * [Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json) - Because that is what everyone uses for JSON
 * [websocket-sharp](https://github.com/sta/websocket-sharp) - To connect to [obs-websocket](https://github.com/Palakis/obs-websocket)
+* [OBS-Websocket-Sharp](https://github.com/C9Glax/OBS-Websocket-Sharp) - To connect to [obs-websocket](https://github.com/Palakis/obs-websocket)
 
 ## License
 
