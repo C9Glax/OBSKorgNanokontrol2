@@ -22,7 +22,7 @@ namespace nanoKontrol2OBS
         public static extern void keybd_event(byte virtualKey, byte scanCode, uint flags, IntPtr extraInfo);
         private OBSConnector obsSocket;
         private Controller nanoController;
-        private Dictionary<SpecialSourceType, SpecialSource> specialSources;
+        private Dictionary<SpecialSourceType, SpecialSourceObject> specialSources;
         private string[] obsScenes;
         private readonly string url, password;
 
@@ -34,13 +34,11 @@ namespace nanoKontrol2OBS
 
         public void Create()
         {
-            this.WriteLine("Connecting to websocket...");
+            this.UpdateLogStatus("Connecting to websocket...");
             this.obsSocket = new OBSConnector(url, password);
-            this.WriteLine("Connected!");
-            this.WriteLine("Setting up audio (This might take a while).");
+            this.UpdateLogStatus("Setting up audio (This might take a while)...");
             this.SetupAudio();
-            this.WriteLine("Audio connected!");
-            this.WriteLine("Connecting nanoKontrol2 (Fancy Animation)");
+            this.UpdateLogStatus("Connecting nanoKontrol2...");
             this.nanoController = new Controller(GetNanoKontrolInputDeviceName(), GetNanoKontrolOutputDeviceName());
             for (byte cc = 16; cc < 70; cc++)
                 this.nanoController.ToggleLED(cc, false);
@@ -53,20 +51,21 @@ namespace nanoKontrol2OBS
                 this.nanoController.ToggleLED(cc, false);
             this.nanoController.OnMidiMessageReceived += OnNanoControllerInput;
             this.SetupNanoController();
-            this.WriteLine("Connected!");
-            this.WriteLine("Setup Event Handlers...");
+            this.UpdateLogStatus("Setup Event Handlers...");
             this.SetupOBSEventHandlers();
-            this.WriteLine("Done!");
+            this.UpdateLogStatus("Connected and Ready!");
         }
 
         public void Dispose()
         {
+            this.UpdateLogStatus("Disposing...");
             for (byte cc = 16; cc < 70; cc++)
                 this.nanoController.ToggleLED(cc, false);
             this.obsSocket.Close();
-            foreach (SpecialSource specialSource in this.specialSources.Values)
+            foreach (SpecialSourceObject specialSource in this.specialSources.Values)
                 specialSource.windowsDevice.Dispose();
             this.nanoController.Dispose();
+            this.UpdateLogStatus("Finished. Goodbye!");
         }
 
         private void SetupOBSEventHandlers()
@@ -102,7 +101,7 @@ namespace nanoKontrol2OBS
 
         private void OnOBSSourceMuteChanged(object sender, OBSConnector.SourceMuteChangedEventArgs e)
         {
-            foreach (SpecialSource potentialSender in this.specialSources.Values)
+            foreach (SpecialSourceObject potentialSender in this.specialSources.Values)
                 if (potentialSender.obsSourceName.Equals(e.sourcename))
                 {
                     if (potentialSender.specialSourceType.Equals(SpecialSourceType.desktop1))
@@ -122,30 +121,30 @@ namespace nanoKontrol2OBS
         private void SetupAudio()
         {
             SpecialSources obsSpecialSources = obsSocket.GetSpecialSources();
-            this.specialSources = new Dictionary<SpecialSourceType, SpecialSource>()
+            this.specialSources = new Dictionary<SpecialSourceType, SpecialSourceObject>()
             {
                 {
-                    SpecialSourceType.desktop1, new SpecialSource(SpecialSourceType.desktop1) {
+                    SpecialSourceType.desktop1, new SpecialSourceObject(SpecialSourceType.desktop1) {
                         obsSourceName = obsSpecialSources.sources[SpecialSourceType.desktop1],
                         windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.sources[SpecialSourceType.desktop1]).Split('}')[1].Substring(2))
                     }
                 },{
-                    SpecialSourceType.desktop2, new SpecialSource(SpecialSourceType.desktop2) {
+                    SpecialSourceType.desktop2, new SpecialSourceObject(SpecialSourceType.desktop2) {
                         obsSourceName = obsSpecialSources.sources[SpecialSourceType.desktop2],
                         windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.sources[SpecialSourceType.desktop2]).Split('}')[1].Substring(2))
                     }
                 },{
-                    SpecialSourceType.mic1, new SpecialSource(SpecialSourceType.mic1) {
+                    SpecialSourceType.mic1, new SpecialSourceObject(SpecialSourceType.mic1) {
                         obsSourceName = obsSpecialSources.sources[SpecialSourceType.mic1],
                         windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.sources[SpecialSourceType.mic1]).Split('}')[1].Substring(2))
                     }
                 },{
-                    SpecialSourceType.mic2, new SpecialSource(SpecialSourceType.mic2) {
+                    SpecialSourceType.mic2, new SpecialSourceObject(SpecialSourceType.mic2) {
                         obsSourceName = obsSpecialSources.sources[SpecialSourceType.mic2],
                         windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.sources[SpecialSourceType.mic2]).Split('}')[1].Substring(2))
                     }
                 },{
-                    SpecialSourceType.mic3, new SpecialSource(SpecialSourceType.mic3) {
+                    SpecialSourceType.mic3, new SpecialSourceObject(SpecialSourceType.mic3) {
                         obsSourceName = obsSpecialSources.sources[SpecialSourceType.mic3],
                         windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.sources[SpecialSourceType.mic3]).Split('}')[1].Substring(2))
                     }
@@ -160,7 +159,7 @@ namespace nanoKontrol2OBS
 
         private void WindowsDevice_OnMuteStateChanged(object sender, AudioDevice.OnMuteStateChangedEventArgs e)
         {
-            foreach(SpecialSource potentialSender in this.specialSources.Values)
+            foreach(SpecialSourceObject potentialSender in this.specialSources.Values)
                 if (potentialSender.windowsDevice.Equals(sender))
                 {
                     if (potentialSender.specialSourceType.Equals(SpecialSourceType.desktop1))
@@ -207,6 +206,7 @@ namespace nanoKontrol2OBS
         }
         private void OnNanoControllerInput(object sender, Controller.MidiMessageReceivedEventArgs e)
         {
+            this.LogInfo("Button {0} pressed! ({1})", e.control.ToString(), e.value.ToString());
             switch (e.control)
             {
                 //Sliders
@@ -307,7 +307,7 @@ namespace nanoKontrol2OBS
             foreach(string potentialName in MidiInformation.GetInputDevices())
                 if (potentialName.Contains("nano"))
                     return potentialName;
-            return "";
+            return string.Empty;
         }
 
         private string GetNanoKontrolOutputDeviceName()
@@ -315,19 +315,32 @@ namespace nanoKontrol2OBS
             foreach (string potentialName in MidiInformation.GetOutputDevices())
                 if (potentialName.Contains("nano"))
                     return potentialName;
-            return "";
+            return string.Empty;
         }
 
-        public event LogEventHandler OnLoggingEvent;
+        public event LogEventHandler OnInfoLog;
+        public event LogEventHandler OnWarningLog;
+        public event LogEventHandler OnStatusLog;
+        
+        public delegate void LogEventHandler(object sender, LogEventArgs e);
         public class LogEventArgs : EventArgs
         {
             public string text;
         }
-        public delegate void LogEventHandler(object sender, LogEventArgs e);
 
-        private void WriteLine(string format, params string[] replace)
+        private void LogWarning(string format, params string[] replace)
         {
-            this.OnLoggingEvent?.Invoke(this, new LogEventArgs() { text = string.Format(format, replace) });
+            this.OnWarningLog?.Invoke(this, new LogEventArgs() { text = string.Format(format, replace) });
+        }
+
+        private void LogInfo(string format, params string[] replace)
+        {
+            this.OnInfoLog?.Invoke(this, new LogEventArgs() { text = string.Format(format, replace) });
+        }
+
+        private void UpdateLogStatus(string format, params string[] replace)
+        {
+            this.OnStatusLog?.Invoke(this, new LogEventArgs() { text = string.Format(format, replace) });
         }
     }
 }
