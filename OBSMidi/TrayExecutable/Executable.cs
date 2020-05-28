@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace TrayExecutable
 {
-    static class Program
+    static class Executable
     {
         /// <summary>
         /// Der Haupteinstiegspunkt für die Anwendung.
