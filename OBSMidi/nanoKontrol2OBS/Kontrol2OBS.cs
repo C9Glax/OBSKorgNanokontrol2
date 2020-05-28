@@ -23,7 +23,7 @@ namespace nanoKontrol2OBS
         private OBSConnector obsSocket;
         private Controller nanoController;
         private Dictionary<SpecialSourceType, SpecialSourceObject> specialSources;
-        private string[] obsScenes;
+        private Scene[] obsScenes;
         private readonly string url, password;
 
         public Kontrol2OBS(string url, string password)
@@ -85,10 +85,19 @@ namespace nanoKontrol2OBS
 
         private void OnStreamStatusUpdate(object sender, OBSConnector.StreamStatusUpdateEventArgs e)
         {
-            this.nanoController.ToggleLED(Control.play, e.status.streaming);
-            this.nanoController.ToggleLED(Control.record, e.status.replayBufferActive);
-            this.nanoController.ToggleLED(Control.back, e.status.totalStreamTime % 4 == 0);
-            this.nanoController.ToggleLED(Control.forward, e.status.totalStreamTime % 4 != 0);
+            this.nanoController.ToggleLED(Control.play, e.streaming);
+            this.nanoController.ToggleLED(Control.record, e.replayBufferActive);
+            if (e.streaming)
+            {
+                this.nanoController.ToggleLED(Control.back, e.totalStreamTime % 4 == 0);
+                this.nanoController.ToggleLED(Control.forward, e.totalStreamTime % 4 != 0);
+            }
+            else
+            {
+                this.nanoController.ToggleLED(Control.back, false);
+                this.nanoController.ToggleLED(Control.forward, false);
+            }
+
         }
 
         private void OnSceneSwitched(object sender, OBSConnector.SceneSwitchedEventArgs e)
@@ -106,7 +115,7 @@ namespace nanoKontrol2OBS
         private void OnOBSSourceMuteChanged(object sender, OBSConnector.SourceMuteChangedEventArgs e)
         {
             foreach (SpecialSourceObject potentialSender in this.specialSources.Values)
-                if (potentialSender.obsSourceName.Equals(e.sourcename))
+                if (potentialSender.obsSourceName.Equals(e.sourceName))
                 {
                     if (potentialSender.specialSourceType.Equals(SpecialSourceType.desktop1))
                         this.nanoController.ToggleLED(GroupControls.r, 0, !e.muted);
@@ -129,28 +138,28 @@ namespace nanoKontrol2OBS
             {
                 {
                     SpecialSourceType.desktop1, new SpecialSourceObject(SpecialSourceType.desktop1) {
-                        obsSourceName = obsSpecialSources.sources[SpecialSourceType.desktop1],
-                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.sources[SpecialSourceType.desktop1]).Split('}')[1].Substring(2))
+                        obsSourceName = obsSpecialSources.specialSourceNames[SpecialSourceType.desktop1],
+                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.specialSourceNames[SpecialSourceType.desktop1]).Split('}')[1].Substring(2))
                     }
                 },{
                     SpecialSourceType.desktop2, new SpecialSourceObject(SpecialSourceType.desktop2) {
-                        obsSourceName = obsSpecialSources.sources[SpecialSourceType.desktop2],
-                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.sources[SpecialSourceType.desktop2]).Split('}')[1].Substring(2))
+                        obsSourceName = obsSpecialSources.specialSourceNames[SpecialSourceType.desktop2],
+                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.specialSourceNames[SpecialSourceType.desktop2]).Split('}')[1].Substring(2))
                     }
                 },{
                     SpecialSourceType.mic1, new SpecialSourceObject(SpecialSourceType.mic1) {
-                        obsSourceName = obsSpecialSources.sources[SpecialSourceType.mic1],
-                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.sources[SpecialSourceType.mic1]).Split('}')[1].Substring(2))
+                        obsSourceName = obsSpecialSources.specialSourceNames[SpecialSourceType.mic1],
+                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.specialSourceNames[SpecialSourceType.mic1]).Split('}')[1].Substring(2))
                     }
                 },{
                     SpecialSourceType.mic2, new SpecialSourceObject(SpecialSourceType.mic2) {
-                        obsSourceName = obsSpecialSources.sources[SpecialSourceType.mic2],
-                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.sources[SpecialSourceType.mic2]).Split('}')[1].Substring(2))
+                        obsSourceName = obsSpecialSources.specialSourceNames[SpecialSourceType.mic2],
+                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.specialSourceNames[SpecialSourceType.mic2]).Split('}')[1].Substring(2))
                     }
                 },{
                     SpecialSourceType.mic3, new SpecialSourceObject(SpecialSourceType.mic3) {
-                        obsSourceName = obsSpecialSources.sources[SpecialSourceType.mic3],
-                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.sources[SpecialSourceType.mic3]).Split('}')[1].Substring(2))
+                        obsSourceName = obsSpecialSources.specialSourceNames[SpecialSourceType.mic3],
+                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.specialSourceNames[SpecialSourceType.mic3]).Split('}')[1].Substring(2))
                     }
                 }
             };
@@ -183,8 +192,8 @@ namespace nanoKontrol2OBS
 
         private void SetupNanoController()
         {
-            this.obsScenes = this.obsSocket.GetSceneList();
-            string currentScene = this.obsSocket.GetCurrentScene();
+            this.obsScenes = this.obsSocket.GetSceneList().scenes;
+            string currentScene = this.obsSocket.GetCurrentScene().name;
             for(byte soloButtonIndex = 0; soloButtonIndex < this.obsScenes.Length && soloButtonIndex < 8; soloButtonIndex++)
             {
                 if (currentScene.Equals(this.obsScenes[soloButtonIndex]))
@@ -205,9 +214,10 @@ namespace nanoKontrol2OBS
             this.nanoController.ToggleLED(GroupControls.mute, 3, this.specialSources[SpecialSourceType.mic2].windowsDevice.IsMuted());
             this.nanoController.ToggleLED(GroupControls.mute, 4, this.specialSources[SpecialSourceType.mic3].windowsDevice.IsMuted());
 
-            StreamStatus stats = this.obsSocket.GetStreamingStatus();
+            GetStreamingStatusObject stats = this.obsSocket.GetStreamingStatus();
             this.nanoController.ToggleLED(Control.play, stats.streaming);
         }
+
         private void OnNanoControllerInput(object sender, Controller.MidiMessageReceivedEventArgs e)
         {
             this.LogInfo("Button {0} pressed! ({1})", e.control.ToString(), e.value.ToString());
@@ -300,9 +310,9 @@ namespace nanoKontrol2OBS
             //Solo
             if(e.control >= 32 && e.control <= 39)
             {
-                string[] scenes = this.obsSocket.GetSceneList();
+                Scene[] scenes = this.obsSocket.GetSceneList().scenes;
                 if (scenes.Length > (e.control - 32))
-                    this.obsSocket.SetCurrentScene(scenes[e.control - 32]);
+                    this.obsSocket.SetCurrentScene(scenes[e.control - 32].name);
             }
         }
 
