@@ -5,12 +5,12 @@ namespace nanoKontrol2OBS
 {
     partial class Kontrol2OBS
     {
-        internal class SpecialSource
+        internal class SpecialSourceObject
         {
             public SpecialSourceType specialSourceType;
             public string obsSourceName;
             public AudioDevice windowsDevice;
-            public SpecialSource(SpecialSourceType specialSourceType)
+            public SpecialSourceObject(SpecialSourceType specialSourceType)
             {
                 this.specialSourceType = specialSourceType;
             }

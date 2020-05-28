@@ -57,7 +57,7 @@
   <ItemGroup>
     <Compile Include="Kontrol2OBS.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SpecialSource.cs" />
+    <Compile Include="SpecialSourceObject.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
