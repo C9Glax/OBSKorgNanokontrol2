@@ -36,19 +36,23 @@ namespace nanoKontrol2OBS
         {
             this.UpdateLogStatus("Connecting to websocket...");
             this.obsSocket = new OBSConnector(url, password);
+            this.obsSocket.OnOBSWebsocketInfo += (s, e) => { this.OnInfoLog?.Invoke(s, new LogEventArgs() { text = e.text }); };
+            this.obsSocket.OnOBSWebsocketWarning += (s, e) => { this.OnWarningLog?.Invoke(s, new LogEventArgs() { text = e.text }); };
             this.UpdateLogStatus("Setting up audio (This might take a while)...");
             this.SetupAudio();
             this.UpdateLogStatus("Connecting nanoKontrol2...");
             this.nanoController = new Controller(GetNanoKontrolInputDeviceName(), GetNanoKontrolOutputDeviceName());
-            for (byte cc = 16; cc < 70; cc++)
-                this.nanoController.ToggleLED(cc, false);
+
             for (byte cc = 16; cc < 70; cc++)//Fancy Animation
+                this.nanoController.ToggleLED(cc, false);
+            for (byte cc = 16; cc < 70; cc++)
             {
                 this.nanoController.ToggleLED(cc, true);
                 Thread.Sleep(25);
             }
             for (byte cc = 16; cc < 70; cc++)
                 this.nanoController.ToggleLED(cc, false);
+
             this.nanoController.OnMidiMessageReceived += OnNanoControllerInput;
             this.SetupNanoController();
             this.UpdateLogStatus("Setup Event Handlers...");
