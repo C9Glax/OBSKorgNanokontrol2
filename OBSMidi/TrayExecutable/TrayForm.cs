@@ -1,6 +1,6 @@
-﻿using System;
+﻿using nanoKontrol2OBS;
+using System;
 using System.Windows.Forms;
-using nanoKontrol2OBS;
 
 namespace TrayExecutable
 {

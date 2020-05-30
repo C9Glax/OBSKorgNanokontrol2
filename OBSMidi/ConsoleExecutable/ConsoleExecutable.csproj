@@ -73,5 +73,6 @@
   <ItemGroup>
     <None Include="Resources\nanoKontrol2OBS.ico" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
