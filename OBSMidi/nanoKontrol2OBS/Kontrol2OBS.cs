@@ -67,7 +67,8 @@ namespace nanoKontrol2OBS
                 this.nanoController.ToggleLED(cc, false);
             this.obsSocket.Close();
             foreach (SpecialSourceObject specialSource in this.specialSources.Values)
-                specialSource.windowsDevice.Dispose();
+                if(specialSource.connected)
+                    specialSource.windowsDevice.Dispose();
             this.nanoController.Dispose();
             this.UpdateLogStatus("Finished. Goodbye!");
         }
@@ -133,41 +134,47 @@ namespace nanoKontrol2OBS
 
         private void SetupAudio()
         {
-            SpecialSources obsSpecialSources = obsSocket.GetSpecialSources();
+            SpecialSources obsSpecialSources = this.obsSocket.GetSpecialSources();
+            List<string> connectedSpecialSources = new List<string>();
+            foreach (Source s in this.obsSocket.GetSourcesList())
+                if (s.typeId.Contains("wasapi"))
+                    connectedSpecialSources.Add(s.name);
             this.specialSources = new Dictionary<SpecialSourceType, SpecialSourceObject>()
             {
                 {
                     SpecialSourceType.desktop1, new SpecialSourceObject(SpecialSourceType.desktop1) {
-                        obsSourceName = obsSpecialSources.specialSourceNames[SpecialSourceType.desktop1],
-                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.specialSourceNames[SpecialSourceType.desktop1]).Split('}')[1].Substring(2))
+                        obsSourceName = obsSpecialSources.specialSourceNames[SpecialSourceType.desktop1]
                     }
                 },{
                     SpecialSourceType.desktop2, new SpecialSourceObject(SpecialSourceType.desktop2) {
-                        obsSourceName = obsSpecialSources.specialSourceNames[SpecialSourceType.desktop2],
-                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.specialSourceNames[SpecialSourceType.desktop2]).Split('}')[1].Substring(2))
+                        obsSourceName = obsSpecialSources.specialSourceNames[SpecialSourceType.desktop2]
                     }
                 },{
                     SpecialSourceType.mic1, new SpecialSourceObject(SpecialSourceType.mic1) {
-                        obsSourceName = obsSpecialSources.specialSourceNames[SpecialSourceType.mic1],
-                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.specialSourceNames[SpecialSourceType.mic1]).Split('}')[1].Substring(2))
+                        obsSourceName = obsSpecialSources.specialSourceNames[SpecialSourceType.mic1]
                     }
                 },{
                     SpecialSourceType.mic2, new SpecialSourceObject(SpecialSourceType.mic2) {
-                        obsSourceName = obsSpecialSources.specialSourceNames[SpecialSourceType.mic2],
-                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.specialSourceNames[SpecialSourceType.mic2]).Split('}')[1].Substring(2))
+                        obsSourceName = obsSpecialSources.specialSourceNames[SpecialSourceType.mic2]
                     }
                 },{
                     SpecialSourceType.mic3, new SpecialSourceObject(SpecialSourceType.mic3) {
-                        obsSourceName = obsSpecialSources.specialSourceNames[SpecialSourceType.mic3],
-                        windowsDevice = new AudioDevice(this.obsSocket.GetPIDOfAudioDevice(obsSpecialSources.specialSourceNames[SpecialSourceType.mic3]).Split('}')[1].Substring(2))
+                        obsSourceName = obsSpecialSources.specialSourceNames[SpecialSourceType.mic3]
                     }
                 }
             };
-            this.specialSources[SpecialSourceType.desktop1].windowsDevice.OnMuteStateChanged += WindowsDevice_OnMuteStateChanged;
-            this.specialSources[SpecialSourceType.desktop2].windowsDevice.OnMuteStateChanged += WindowsDevice_OnMuteStateChanged;
-            this.specialSources[SpecialSourceType.mic1].windowsDevice.OnMuteStateChanged += WindowsDevice_OnMuteStateChanged;
-            this.specialSources[SpecialSourceType.mic2].windowsDevice.OnMuteStateChanged += WindowsDevice_OnMuteStateChanged;
-            this.specialSources[SpecialSourceType.mic3].windowsDevice.OnMuteStateChanged += WindowsDevice_OnMuteStateChanged;
+
+            foreach(SpecialSourceObject specialSource in this.specialSources.Values)
+            {
+                specialSource.connected = connectedSpecialSources.Contains(specialSource.obsSourceName);
+                if (specialSource.connected)
+                {
+                    string pid = this.obsSocket.GetPIDOfAudioDevice(specialSource.obsSourceName);
+                    string guid = pid.Replace("}.{", "@").Split('@')[1].Substring(0, 36);
+                    specialSource.windowsDevice = new AudioDevice(guid);
+                    specialSource.windowsDevice.OnMuteStateChanged += WindowsDevice_OnMuteStateChanged;
+                }
+            }
         }
 
         private void WindowsDevice_OnMuteStateChanged(object sender, AudioDevice.OnMuteStateChangedEventArgs e)
@@ -202,17 +209,17 @@ namespace nanoKontrol2OBS
                     this.nanoController.ToggleLED(GroupControls.solo, soloButtonIndex, false);
             }
 
-            this.nanoController.ToggleLED(GroupControls.r, 0, !this.obsSocket.GetMute(this.specialSources[SpecialSourceType.desktop1].obsSourceName));
-            this.nanoController.ToggleLED(GroupControls.r, 1, !this.obsSocket.GetMute(this.specialSources[SpecialSourceType.desktop2].obsSourceName));
-            this.nanoController.ToggleLED(GroupControls.r, 2, !this.obsSocket.GetMute(this.specialSources[SpecialSourceType.mic1].obsSourceName));
-            this.nanoController.ToggleLED(GroupControls.r, 3, !this.obsSocket.GetMute(this.specialSources[SpecialSourceType.mic2].obsSourceName));
-            this.nanoController.ToggleLED(GroupControls.r, 4, !this.obsSocket.GetMute(this.specialSources[SpecialSourceType.mic3].obsSourceName));
+            this.nanoController.ToggleLED(GroupControls.r, 0, this.specialSources[SpecialSourceType.desktop1].connected ? !this.obsSocket.GetMute(this.specialSources[SpecialSourceType.desktop1].obsSourceName) : false);
+            this.nanoController.ToggleLED(GroupControls.r, 1, this.specialSources[SpecialSourceType.desktop2].connected ? !this.obsSocket.GetMute(this.specialSources[SpecialSourceType.desktop2].obsSourceName) : false);
+            this.nanoController.ToggleLED(GroupControls.r, 2, this.specialSources[SpecialSourceType.mic1].connected ? !this.obsSocket.GetMute(this.specialSources[SpecialSourceType.mic1].obsSourceName) : false);
+            this.nanoController.ToggleLED(GroupControls.r, 3, this.specialSources[SpecialSourceType.mic2].connected ? !this.obsSocket.GetMute(this.specialSources[SpecialSourceType.mic2].obsSourceName) : false);
+            this.nanoController.ToggleLED(GroupControls.r, 4, this.specialSources[SpecialSourceType.mic3].connected ? !this.obsSocket.GetMute(this.specialSources[SpecialSourceType.mic3].obsSourceName) : false);
 
-            this.nanoController.ToggleLED(GroupControls.mute, 0, this.specialSources[SpecialSourceType.desktop1].windowsDevice.IsMuted());
-            this.nanoController.ToggleLED(GroupControls.mute, 1, this.specialSources[SpecialSourceType.desktop2].windowsDevice.IsMuted());
-            this.nanoController.ToggleLED(GroupControls.mute, 2, this.specialSources[SpecialSourceType.mic1].windowsDevice.IsMuted());
-            this.nanoController.ToggleLED(GroupControls.mute, 3, this.specialSources[SpecialSourceType.mic2].windowsDevice.IsMuted());
-            this.nanoController.ToggleLED(GroupControls.mute, 4, this.specialSources[SpecialSourceType.mic3].windowsDevice.IsMuted());
+            this.nanoController.ToggleLED(GroupControls.mute, 0, this.specialSources[SpecialSourceType.desktop2].connected ? this.specialSources[SpecialSourceType.desktop1].windowsDevice.IsMuted() : false);
+            this.nanoController.ToggleLED(GroupControls.mute, 1, this.specialSources[SpecialSourceType.desktop1].connected ? this.specialSources[SpecialSourceType.desktop2].windowsDevice.IsMuted() : false);
+            this.nanoController.ToggleLED(GroupControls.mute, 2, this.specialSources[SpecialSourceType.mic1].connected ? this.specialSources[SpecialSourceType.mic1].windowsDevice.IsMuted() : false);
+            this.nanoController.ToggleLED(GroupControls.mute, 3, this.specialSources[SpecialSourceType.mic2].connected ? this.specialSources[SpecialSourceType.mic2].windowsDevice.IsMuted() : false);
+            this.nanoController.ToggleLED(GroupControls.mute, 4, this.specialSources[SpecialSourceType.mic3].connected ? this.specialSources[SpecialSourceType.mic3].windowsDevice.IsMuted() : false);
 
             GetStreamingStatusObject stats = this.obsSocket.GetStreamingStatus();
             this.nanoController.ToggleLED(Control.play, stats.streaming);
@@ -225,67 +232,87 @@ namespace nanoKontrol2OBS
             {
                 //Sliders
                 case 0:
-                    this.obsSocket.SetVolume(this.specialSources[SpecialSourceType.desktop1].obsSourceName, Convert.ToDouble(e.value).Map(0, 127, 0, 1));
+                    if(this.specialSources[SpecialSourceType.desktop1].connected)
+                        this.obsSocket.SetVolume(this.specialSources[SpecialSourceType.desktop1].obsSourceName, Convert.ToDouble(e.value).Map(0, 127, 0, 1));
                     break;
                 case 1:
-                    this.obsSocket.SetVolume(this.specialSources[SpecialSourceType.desktop2].obsSourceName, Convert.ToDouble(e.value).Map(0, 127, 0, 1));
+                    if (this.specialSources[SpecialSourceType.desktop2].connected)
+                        this.obsSocket.SetVolume(this.specialSources[SpecialSourceType.desktop2].obsSourceName, Convert.ToDouble(e.value).Map(0, 127, 0, 1));
                     break;
                 case 2:
-                    this.obsSocket.SetVolume(this.specialSources[SpecialSourceType.mic1].obsSourceName, Convert.ToDouble(e.value).Map(0, 127, 0, 1));
+                    if (this.specialSources[SpecialSourceType.mic1].connected)
+                        this.obsSocket.SetVolume(this.specialSources[SpecialSourceType.mic1].obsSourceName, Convert.ToDouble(e.value).Map(0, 127, 0, 1));
                     break;
                 case 3:
-                    this.obsSocket.SetVolume(this.specialSources[SpecialSourceType.mic2].obsSourceName, Convert.ToDouble(e.value).Map(0, 127, 0, 1));
+                    if (this.specialSources[SpecialSourceType.mic2].connected)
+                        this.obsSocket.SetVolume(this.specialSources[SpecialSourceType.mic2].obsSourceName, Convert.ToDouble(e.value).Map(0, 127, 0, 1));
                     break;
                 case 4:
-                    this.obsSocket.SetVolume(this.specialSources[SpecialSourceType.mic3].obsSourceName, Convert.ToDouble(e.value).Map(0, 127, 0, 1));
+                    if (this.specialSources[SpecialSourceType.mic3].connected)
+                        this.obsSocket.SetVolume(this.specialSources[SpecialSourceType.mic3].obsSourceName, Convert.ToDouble(e.value).Map(0, 127, 0, 1));
                     break;
                 //Dials
                 case 16:
-                    this.specialSources[SpecialSourceType.desktop1].windowsDevice.SetVolume(Convert.ToDouble(e.value).Map(0, 127, 0, 100));
+                    if (this.specialSources[SpecialSourceType.desktop1].connected)
+                        this.specialSources[SpecialSourceType.desktop1].windowsDevice.SetVolume(Convert.ToDouble(e.value).Map(0, 127, 0, 100));
                     break;
                 case 17:
-                    this.specialSources[SpecialSourceType.desktop2].windowsDevice.SetVolume(Convert.ToDouble(e.value).Map(0, 127, 0, 100));
+                    if (this.specialSources[SpecialSourceType.desktop2].connected)
+                        this.specialSources[SpecialSourceType.desktop2].windowsDevice.SetVolume(Convert.ToDouble(e.value).Map(0, 127, 0, 100));
                     break;
                 case 18:
-                    this.specialSources[SpecialSourceType.mic1].windowsDevice.SetVolume(Convert.ToDouble(e.value).Map(0, 127, 0, 100));
+                    if (this.specialSources[SpecialSourceType.mic1].connected)
+                        this.specialSources[SpecialSourceType.mic1].windowsDevice.SetVolume(Convert.ToDouble(e.value).Map(0, 127, 0, 100));
                     break;
                 case 19:
-                    this.specialSources[SpecialSourceType.mic2].windowsDevice.SetVolume(Convert.ToDouble(e.value).Map(0, 127, 0, 100));
+                    if (this.specialSources[SpecialSourceType.mic2].connected)
+                        this.specialSources[SpecialSourceType.mic2].windowsDevice.SetVolume(Convert.ToDouble(e.value).Map(0, 127, 0, 100));
                     break;
                 case 20:
-                    this.specialSources[SpecialSourceType.mic3].windowsDevice.SetVolume(Convert.ToDouble(e.value).Map(0, 127, 0, 100));
+                    if (this.specialSources[SpecialSourceType.mic3].connected)
+                        this.specialSources[SpecialSourceType.mic3].windowsDevice.SetVolume(Convert.ToDouble(e.value).Map(0, 127, 0, 100));
                     break;
                 //Mute
                 case 48:
-                    this.specialSources[SpecialSourceType.desktop1].windowsDevice.ToggleMute();
+                    if (this.specialSources[SpecialSourceType.desktop1].connected)
+                        this.specialSources[SpecialSourceType.desktop1].windowsDevice.ToggleMute();
                     break;
                 case 49:
-                    this.specialSources[SpecialSourceType.desktop2].windowsDevice.ToggleMute();
+                    if (this.specialSources[SpecialSourceType.desktop2].connected)
+                        this.specialSources[SpecialSourceType.desktop2].windowsDevice.ToggleMute();
                     break;
                 case 50:
-                    this.specialSources[SpecialSourceType.mic1].windowsDevice.ToggleMute();
+                    if (this.specialSources[SpecialSourceType.mic1].connected)
+                        this.specialSources[SpecialSourceType.mic1].windowsDevice.ToggleMute();
                     break;
                 case 51:
-                    this.specialSources[SpecialSourceType.mic2].windowsDevice.ToggleMute();
+                    if (this.specialSources[SpecialSourceType.mic2].connected)
+                        this.specialSources[SpecialSourceType.mic2].windowsDevice.ToggleMute();
                     break;
                 case 52:
-                    this.specialSources[SpecialSourceType.mic3].windowsDevice.ToggleMute();
+                    if (this.specialSources[SpecialSourceType.mic3].connected)
+                        this.specialSources[SpecialSourceType.mic3].windowsDevice.ToggleMute();
                     break;
                 //R
                 case 64:
-                    this.obsSocket.ToggleMute(this.specialSources[SpecialSourceType.desktop1].obsSourceName);
+                    if (this.specialSources[SpecialSourceType.desktop1].connected)
+                        this.obsSocket.ToggleMute(this.specialSources[SpecialSourceType.desktop1].obsSourceName);
                     break;
                 case 65:
-                    this.obsSocket.ToggleMute(this.specialSources[SpecialSourceType.desktop2].obsSourceName);
+                    if (this.specialSources[SpecialSourceType.desktop2].connected)
+                        this.obsSocket.ToggleMute(this.specialSources[SpecialSourceType.desktop2].obsSourceName);
                     break;
                 case 66:
-                    this.obsSocket.ToggleMute(this.specialSources[SpecialSourceType.mic1].obsSourceName);
+                    if (this.specialSources[SpecialSourceType.mic1].connected)
+                        this.obsSocket.ToggleMute(this.specialSources[SpecialSourceType.mic1].obsSourceName);
                     break;
                 case 67:
-                    this.obsSocket.ToggleMute(this.specialSources[SpecialSourceType.mic2].obsSourceName);
+                    if (this.specialSources[SpecialSourceType.mic2].connected)
+                        this.obsSocket.ToggleMute(this.specialSources[SpecialSourceType.mic2].obsSourceName);
                     break;
                 case 68:
-                    this.obsSocket.ToggleMute(this.specialSources[SpecialSourceType.mic3].obsSourceName);
+                    if (this.specialSources[SpecialSourceType.mic3].connected)
+                        this.obsSocket.ToggleMute(this.specialSources[SpecialSourceType.mic3].obsSourceName);
                     break;
                 //Play
                 case 41:

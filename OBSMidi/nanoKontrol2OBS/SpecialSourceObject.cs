@@ -10,6 +10,7 @@ namespace nanoKontrol2OBS
             public SpecialSourceType specialSourceType;
             public string obsSourceName;
             public AudioDevice windowsDevice;
+            public bool connected;
             public SpecialSourceObject(SpecialSourceType specialSourceType)
             {
                 this.specialSourceType = specialSourceType;
