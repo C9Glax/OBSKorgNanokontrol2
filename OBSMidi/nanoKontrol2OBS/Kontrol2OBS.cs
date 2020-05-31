@@ -227,7 +227,6 @@ namespace nanoKontrol2OBS
 
         private void OnNanoControllerInput(object sender, Controller.MidiMessageReceivedEventArgs e)
         {
-            this.LogInfo("Button {0} pressed! ({1})", e.control.ToString(), e.value.ToString());
             switch (e.control)
             {
                 //Sliders
@@ -316,22 +315,22 @@ namespace nanoKontrol2OBS
                     break;
                 //Play
                 case 41:
-                    if(e.value == 127) this.obsSocket.StartStopStreaming();
+                    this.obsSocket.StartStopStreaming();
                     break;
                 //Stop
                 case 42:
-                    if (e.value == 127) keybd_event(0xB3, 0, 1, IntPtr.Zero);
+                    keybd_event(0xB3, 0, 1, IntPtr.Zero);
                     break;
                 //Back
                 case 43:
-                    if (e.value == 127) keybd_event(0xB1, 0, 1, IntPtr.Zero);
+                    keybd_event(0xB1, 0, 1, IntPtr.Zero);
                     break;
                 //Forward
                 case 44:
-                    if (e.value == 127) keybd_event(0xB0, 0, 1, IntPtr.Zero);
+                    keybd_event(0xB0, 0, 1, IntPtr.Zero);
                     break;
                 case 45:
-                    if (e.value == 127) this.obsSocket.SaveReplayBuffer();
+                    this.obsSocket.SaveReplayBuffer();
                     break;
             }
             //Solo
