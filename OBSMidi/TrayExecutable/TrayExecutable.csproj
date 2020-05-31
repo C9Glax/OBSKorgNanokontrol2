@@ -73,6 +73,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="nanoKontrol2 Settings.nktrl2_data">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Resources\nanoKontrol2OBS.png" />
   </ItemGroup>
   <ItemGroup>
