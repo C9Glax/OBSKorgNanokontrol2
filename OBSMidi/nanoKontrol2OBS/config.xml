@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<config>
+  <inputs>
+    <slider midicontrolid="0" action="setobsvolume(desktop1)" />
+    <slider midicontrolid="1" action="setobsvolume(desktop2)" />
+    <slider midicontrolid="2" action="setobsvolume(mic1)" />
+    <slider midicontrolid="3" action="setobsvolume(mic2)" />
+    <slider midicontrolid="4" action="setobsvolume(mic3)" />
+    <dial midicontrolid="16" action="setwindowsvolume(desktop1)" />
+    <dial midicontrolid="17" action="setwindowsvolume(desktop2)" />
+    <dial midicontrolid="18" action="setwindowsvolume(mic1)" />
+    <dial midicontrolid="19" action="setwindowsvolume(mic2)" />
+    <dial midicontrolid="20" action="setwindowsvolume(mic3)" />
+    <button midicontrolid="32" action="switchscene(0)" />
+    <button midicontrolid="33" action="switchscene(1)" />
+    <button midicontrolid="34" action="switchscene(2)" />
+    <button midicontrolid="35" action="switchscene(3)" />
+    <button midicontrolid="36" action="switchscene(4)" />
+    <button midicontrolid="37" action="switchscene(5)" />
+    <button midicontrolid="38" action="switchscene(6)" />
+    <button midicontrolid="39" action="switchscene(7)" />
+    <button midicontrolid="41" action="startstopstream()" />
+    <button midicontrolid="42" action="playpause()" />
+    <button midicontrolid="43" action="previoustrack()" />
+    <button midicontrolid="44" action="nexttrack()" />
+    <button midicontrolid="45" action="savereplay()" />
+    <button midicontrolid="48" action="windowsmute(desktop1)" />
+    <button midicontrolid="49" action="windowsmute(desktop2)" />
+    <button midicontrolid="50" action="windowsmute(mic1)" />
+    <button midicontrolid="51" action="windowsmute(mic2)" />
+    <button midicontrolid="52" action="windowsmute(mic3)" />
+    <button midicontrolid="64" action="obsmute(desktop1)" />
+    <button midicontrolid="65" action="obsmute(desktop2)" />
+    <button midicontrolid="66" action="obsmute(mic1)" />
+    <button midicontrolid="67" action="obsmute(mic2)" />
+    <button midicontrolid="68" action="obsmute(mic3)" />
+  </inputs>
+  <outputs>
+    
+  </outputs>
+</config>

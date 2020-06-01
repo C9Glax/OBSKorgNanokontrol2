@@ -11,6 +11,42 @@ Connect to [obs-websocket](https://github.com/Palakis/obs-websocket)
 
 A working [obs-websocket](https://github.com/Palakis/obs-websocket) installation.
 
+### Config
+
+The Binds-config has to be in the same folder as the executable and has to be named `config.xml`.
+The Schema is `config.xsd`.
+
+`inputs` can be	`slider`,`dial` or `button`.
+`slider`- and `dial`-Actions can be:
+```
+setobsvolume(<source>)
+setwindowsvolume(<source>)
+```
+`button`-Actions can be:
+```
+obsmute(<source>)
+switchscene(<index>)
+windowsmute(<source>)
+previoustrack()
+nexttrack()
+playpause()
+startstopstream()
+savereplay()
+
+```
+`<source>`can be:
+```
+desktop1
+desktop2
+mic1
+mic2
+mic3
+```
+`<index>` is a zero-based integer.
+
+Example:
+`<button midicontrolid="48" action="windowsmute(desktop1)" />`
+
 ## Built With
 
 * [NAudio](https://github.com/naudio/NAudio) - MIDI Controls
