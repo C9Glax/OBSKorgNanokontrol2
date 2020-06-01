@@ -13,10 +13,14 @@ A working [obs-websocket](https://github.com/Palakis/obs-websocket) installation
 
 ### Config
 
+The default config is my own preference. Different people might want different setups. So here you go.
+
 The Binds-config has to be in the same folder as the executable and has to be named `config.xml`.
+
 The Schema is `config.xsd`.
 
 `inputs` can be	`slider`,`dial` or `button`.
+
 `slider`- and `dial`-Actions can be:
 ```
 setobsvolume(<source>)
