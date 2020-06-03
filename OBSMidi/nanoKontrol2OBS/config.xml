@@ -36,6 +36,25 @@
     <button midicontrolid="68" action="obsmute(mic3)" />
   </inputs>
   <outputs>
-    
+    <output midicontrolid="32" event="sceneswitched" sceneindex="0"/>
+    <output midicontrolid="33" event="sceneswitched" sceneindex="1"/>
+    <output midicontrolid="34" event="sceneswitched" sceneindex="2"/>
+    <output midicontrolid="35" event="sceneswitched" sceneindex="3"/>
+    <output midicontrolid="36" event="sceneswitched" sceneindex="4"/>
+    <output midicontrolid="37" event="sceneswitched" sceneindex="5"/>
+    <output midicontrolid="38" event="sceneswitched" sceneindex="6"/>
+    <output midicontrolid="39" event="sceneswitched" sceneindex="7"/>
+    <output midicontrolid="41" event="streamstatuschanged"/>
+    <output midicontrolid="45" event="replaystatuschanged"/>
+    <output midicontrolid="48" event="windowsmutechanged" source="desktop1"/>
+    <output midicontrolid="49" event="windowsmutechanged" source="desktop2"/>
+    <output midicontrolid="50" event="windowsmutechanged" source="mic1"/>
+    <output midicontrolid="51" event="windowsmutechanged" source="mic2"/>
+    <output midicontrolid="52" event="windowsmutechanged" source="mic3"/>
+    <output midicontrolid="64" event="obsmutechanged" source="desktop1"/>
+    <output midicontrolid="65" event="obsmutechanged" source="desktop2"/>
+    <output midicontrolid="66" event="obsmutechanged" source="mic1"/>
+    <output midicontrolid="67" event="obsmutechanged" source="mic2"/>
+    <output midicontrolid="68" event="obsmutechanged" source="mic3"/>
   </outputs>
 </config>

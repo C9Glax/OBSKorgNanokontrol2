@@ -11,21 +11,21 @@
 
               <xs:element name="slider">
                 <xs:complexType>
-                  <xs:attribute name="midicontrolid" type="xs:int" use="required"/>
+                  <xs:attribute name="midicontrolid" type="xs:byte" use="required"/>
                   <xs:attribute name="action" type="xs:string" use="required"/>
                 </xs:complexType>
               </xs:element>
 
               <xs:element name="dial">
                 <xs:complexType>
-                  <xs:attribute name="midicontrolid" type="xs:int" use="required"/>
+                  <xs:attribute name="midicontrolid" type="xs:byte" use="required"/>
                   <xs:attribute name="action" type="xs:string" use="required"/>
                 </xs:complexType>
               </xs:element>
 
               <xs:element name="button">
                 <xs:complexType>
-                  <xs:attribute name="midicontrolid" type="xs:int" use="required"/>
+                  <xs:attribute name="midicontrolid" type="xs:byte" use="required"/>
                   <xs:attribute name="action" type="xs:string" use="required"/>
                 </xs:complexType>
               </xs:element>
@@ -37,7 +37,16 @@
         <xs:element name="outputs">
           <xs:complexType>
             <xs:sequence>
-
+              
+              <xs:element name="output">
+                <xs:complexType>
+                  <xs:attribute name="midicontrolid" type="xs:byte" use="required"/>
+                  <xs:attribute name="event" type="xs:string" use="required"/>
+                  <xs:attribute name="source" type="xs:string"/>
+                  <xs:attribute name="sceneindex" type="xs:int"/>
+                </xs:complexType>
+              </xs:element>
+              
             </xs:sequence>
           </xs:complexType>
         </xs:element>

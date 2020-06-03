@@ -10,29 +10,64 @@ namespace nanoKontrol2OBS
     public class Config
     {
 
-        public Dictionary<int, Operation> inputbindings;
+        public Dictionary<int, Action> inputbindings;
+        public List<Reaction> outputbindings;
+
+        public enum outputevent { obsmutechanged, windowsmutechanged, streamstatuschanged, replaystatuschanged, sceneswitched }
+
+        public struct Reaction
+        {
+            public byte control;
+            public SpecialSourceType source;
+            public outputevent cause;
+            public int sceneindex;
+
+            public Reaction(outputevent cause, byte control, SpecialSourceType source)
+            {
+                this.control = control;
+                this.cause = cause;
+                this.source = source;
+                this.sceneindex = 0;
+            }
+
+            public Reaction(outputevent cause, byte control)
+            {
+                this.control = control;
+                this.cause = cause;
+                this.source = SpecialSourceType.desktop1;
+                this.sceneindex = 0;
+            }
+
+            public Reaction(outputevent cause, byte control, int sceneindex)
+            {
+                this.control = control;
+                this.cause = cause;
+                this.source = SpecialSourceType.desktop1;
+                this.sceneindex = sceneindex;
+            }
+        }
 
         public enum action { setobsvolume, setwindowsvolume, obsmute, switchscene, windowsmute, previoustrack, nexttrack, playpause, startstopstream, savereplay}
-        public struct Operation
+        public struct Action
         {
             public action action;
             public SpecialSourceType source;
             public int index;
-            public Operation(action action, SpecialSourceType source)
+            public Action(action action, SpecialSourceType source)
             {
                 this.action = action;
                 this.source = source;
                 this.index = 0;
             }
 
-            public Operation(action action, int index)
+            public Action(action action, int index)
             {
                 this.action = action;
                 this.source = SpecialSourceType.desktop1;
                 this.index = index;
             }
 
-            public Operation(action action)
+            public Action(action action)
             {
                 this.action = action;
                 this.source = SpecialSourceType.desktop1;
@@ -44,7 +79,8 @@ namespace nanoKontrol2OBS
         public Config(Kontrol2OBS parent, string path)
         {
             this.parent = parent;
-            this.inputbindings = new Dictionary<int, Operation>();
+            this.inputbindings = new Dictionary<int, Action>();
+            this.outputbindings = new List<Reaction>();
             XmlDocument config = this.LoadAndValidateConfig(path);
             this.ImportConfig(config);
         }
@@ -54,70 +90,134 @@ namespace nanoKontrol2OBS
             XmlNode inputs = config.GetElementsByTagName("inputs")[0];
             foreach(XmlNode input in inputs.ChildNodes)
             {
-                string inputName = input.Name;
                 string action = input.Attributes.GetNamedItem("action").Value;
-                int control = Convert.ToInt32(input.Attributes.GetNamedItem("midicontrolid").Value);
-                if (inputName.Equals("slider") || inputName.Equals("dial"))
+                byte control = Convert.ToByte(input.Attributes.GetNamedItem("midicontrolid").Value);
+                if (input.Name.Equals("slider") || input.Name.Equals("dial"))
                 {
                     if (action.Contains("setobsvolume"))
                     {
                         SpecialSourceType source = this.GetSpecialSourceTypeFromString(action.Split('(')[1].Split(')')[0]);
-                        this.AddBinding(control, new Operation(Config.action.setobsvolume, source));
+                        this.AddBinding(control, new Action(Config.action.setobsvolume, source));
                     }else if (action.Contains("setwindowsvolume"))
                     {
                         SpecialSourceType source = this.GetSpecialSourceTypeFromString(action.Split('(')[1].Split(')')[0]);
-                        this.AddBinding(control, new Operation(Config.action.setwindowsvolume, source));
+                        this.AddBinding(control, new Action(Config.action.setwindowsvolume, source));
                     }
                     else
                         this.parent.LogInfo("Action {0} can not be associated with slider!", action);
-                }else if (inputName.Equals("button"))
+                }else if (input.Name.Equals("button"))
                 {
                     if (action.Contains("obsmute"))
                     {
                         SpecialSourceType source = this.GetSpecialSourceTypeFromString(action.Split('(')[1].Split(')')[0]);
-                        this.AddBinding(control, new Operation(Config.action.obsmute, source));
+                        this.AddBinding(control, new Action(Config.action.obsmute, source));
                     }
                     else if(action.Contains("switchscene"))
                     {
                         int index = Convert.ToInt32(action.Split('(')[1].Split(')')[0]);
-                        this.AddBinding(control, new Operation(Config.action.switchscene, index));
+                        this.AddBinding(control, new Action(Config.action.switchscene, index));
                     }
                     else if (action.Contains("windowsmute"))
                     {
-                        this.AddBinding(control, new Operation(Config.action.windowsmute));
+                        this.AddBinding(control, new Action(Config.action.windowsmute));
                     }
                     else if (action.Contains("previoustrack"))
                     {
-                        this.AddBinding(control, new Operation(Config.action.previoustrack));
+                        this.AddBinding(control, new Action(Config.action.previoustrack));
                     }
                     else if (action.Contains("nexttrack"))
                     {
-                        this.AddBinding(control, new Operation(Config.action.nexttrack));
+                        this.AddBinding(control, new Action(Config.action.nexttrack));
                     }
                     else if (action.Contains("playpause"))
                     {
-                        this.AddBinding(control, new Operation(Config.action.playpause));
+                        this.AddBinding(control, new Action(Config.action.playpause));
                     }
                     else if (action.Contains("startstopstream"))
                     {
-                        this.AddBinding(control, new Operation(Config.action.startstopstream));
+                        this.AddBinding(control, new Action(Config.action.startstopstream));
                     }
                     else if (action.Contains("savereplay"))
                     {
-                        this.AddBinding(control, new Operation(Config.action.savereplay));
+                        this.AddBinding(control, new Action(Config.action.savereplay));
                     }
                     else
                         this.parent.LogInfo("Action {0} can not be associated with button!", action);
                 }
             }
+
+            XmlNode outputs = config.GetElementsByTagName("outputs")[0];
+            foreach(XmlNode output in outputs.ChildNodes)
+            {
+                string cause = output.Attributes.GetNamedItem("event").Value;
+                byte control = Convert.ToByte(output.Attributes.GetNamedItem("midicontrolid").Value);
+                if (cause.Equals("obsmutechanged"))
+                {
+                    XmlNode source = output.Attributes.GetNamedItem("source");
+                    if (source != null)
+                        this.outputbindings.Add(new Reaction(outputevent.obsmutechanged, control, GetSpecialSourceTypeFromString(source.Value)));
+                    else
+                        this.parent.LogInfo("Attribute 'source' has to be set for event {0}!", cause);
+                }
+                else if (cause.Equals("windowsmutechanged"))
+                {
+                    XmlNode source = output.Attributes.GetNamedItem("source");
+                    if (source != null)
+                        this.outputbindings.Add(new Reaction(outputevent.windowsmutechanged, control, GetSpecialSourceTypeFromString(source.Value)));
+                    else
+                        this.parent.LogInfo("Attribute 'source' has to be set for event {0}!", cause);
+                }
+                else if (cause.Equals("streamstatuschanged"))
+                {
+                    this.outputbindings.Add(new Reaction(outputevent.streamstatuschanged, control));
+                }
+                else if (cause.Equals("replaystatuschanged"))
+                {
+                    this.outputbindings.Add(new Reaction(outputevent.replaystatuschanged, control));
+                }
+                else if (cause.Equals("sceneswitched"))
+                {
+                    XmlNode sceneindex = output.Attributes.GetNamedItem("sceneindex");
+                    if (sceneindex != null)
+                        this.outputbindings.Add(new Reaction(outputevent.sceneswitched, control, Convert.ToInt32(sceneindex.Value)));
+                    else
+                        this.parent.LogInfo("Attribute 'sceneindex' has to be set for event {0}!", cause);
+                }
+                else
+                    this.parent.LogInfo("Event {0} does not exist!", cause);
+            }
         }
 
-        private void AddBinding(int control, Operation operation)
+        private void AddBinding(byte control, Action operation)
         {
             if (!this.inputbindings.ContainsKey(control))
                 this.inputbindings.Add(control, operation);
             else
                 this.parent.LogInfo("Control {0} is already bound!", control.ToString());
+
+        }
+
+        public byte GetOutputToEvent(outputevent cause, SpecialSourceType source)
+        {
+            foreach(Reaction output in this.outputbindings)
+                if (cause == output.cause && source == output.source)
+                    return output.control;
+            return 0;
+        }
+        public byte GetOutputToEvent(outputevent cause)
+        {
+            foreach (Reaction output in this.outputbindings)
+                if (cause == output.cause)
+                    return output.control;
+            return 0;
+        }
+
+        public byte GetOutputToEvent(outputevent cause, int sceneindex)
+        {
+            foreach (Reaction output in this.outputbindings)
+                if (cause == output.cause && sceneindex == output.sceneindex)
+                    return output.control;
+            return 0;
 
         }
 

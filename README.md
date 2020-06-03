@@ -11,15 +11,17 @@ Connect to [obs-websocket](https://github.com/Palakis/obs-websocket)
 
 A working [obs-websocket](https://github.com/Palakis/obs-websocket) installation.
 
-### Config
+## config.xml
 
 The default config is my own preference. Different people might want different setups. So here you go.
 
 The Binds-config has to be in the same folder as the executable and has to be named `config.xml`.
 
-The Schema is `config.xsd`.
+### inputs
 
-`inputs` can be	`slider`,`dial` or `button`.
+`inputs` can be	`slider`,`dial` or `button`. Each input consists of two attributes: `midicontrolid`&`action`.
+
+`midicontrolid` is the MIDI-Control to be assigned.
 
 `slider`- and `dial`-Actions can be:
 ```
@@ -29,7 +31,7 @@ setwindowsvolume(<source>)
 `button`-Actions can be:
 ```
 obsmute(<source>)
-switchscene(<index>)
+switchscene(<sceneindex>)
 windowsmute(<source>)
 previoustrack()
 nexttrack()
@@ -46,10 +48,40 @@ mic1
 mic2
 mic3
 ```
-`<index>` is a zero-based integer.
+`<sceneindex>` is a zero-based integer.
 
 Example:
 `<button midicontrolid="48" action="windowsmute(desktop1)" />`
+
+### outputs
+
+`outputs` can only be `output`. Each `output` consists of at least two attributes: `midicontrolid`&`event`.
+
+`midicontrolid` is the MIDI-Control to be assigned.
+
+`event`-Values can be:
+```
+obsmutechanged
+windowsmutechanged
+streamstatuschanged
+replaystatuschanged
+sceneswitched
+```
+Example: `<output midicontrolid="41" event="streamstatuschanged"/>`
+
+The events `obsmutechanged` and `windowsmutechanged` additionally need the attribute `source`.
+`source`can be:
+```
+desktop1
+desktop2
+mic1
+mic2
+mic3
+```
+Example: `<output midicontrolid="48" event="windowsmutechanged" source="desktop1"/>`
+
+The event `sceneswitched` additionally needs the attribute `sceneindex`, which is a zero-based integer.
+Example: `<output midicontrolid="32" event="sceneswitched" sceneindex="0"/>`
 
 ## Built With
 
