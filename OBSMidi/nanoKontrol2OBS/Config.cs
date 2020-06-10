@@ -255,6 +255,7 @@ namespace nanoKontrol2OBS
             };
             settings.ValidationEventHandler += (s, e) =>
             {
+                this.parent.LogWarning("Config has wrong format!");
                 throw new Exception("Validation failed!", e.Exception);
             };
             try
@@ -263,6 +264,7 @@ namespace nanoKontrol2OBS
             }
             catch (FileNotFoundException)
             {
+                this.parent.LogWarning("Configfile not found at {0}!", path);
                 this.parent.LogWarning("Configfile not found. ({0})", path);
             }
 
