@@ -90,54 +90,55 @@ namespace nanoKontrol2OBS
             XmlNode inputs = config.GetElementsByTagName("inputs")[0];
             foreach(XmlNode input in inputs.ChildNodes)
             {
-                string action = input.Attributes.GetNamedItem("action").Value;
+                string action = input.Attributes.GetNamedItem("action").Value.Split('(')[0];
+                string value = input.Attributes.GetNamedItem("action").Value.Split('(')[1].Split(')')[0];
                 byte control = Convert.ToByte(input.Attributes.GetNamedItem("midicontrolid").Value);
                 if (input.Name.Equals("slider") || input.Name.Equals("dial"))
                 {
-                    if (action.Contains("setobsvolume"))
+                    if (action == "setobsvolume")
                     {
-                        SpecialSourceType source = this.GetSpecialSourceTypeFromString(action.Split('(')[1].Split(')')[0]);
+                        SpecialSourceType source = this.GetSpecialSourceTypeFromString(value);
                         this.AddBinding(control, new Action(Config.action.setobsvolume, source));
-                    }else if (action.Contains("setwindowsvolume"))
+                    }else if (action == "setwindowsvolume")
                     {
-                        SpecialSourceType source = this.GetSpecialSourceTypeFromString(action.Split('(')[1].Split(')')[0]);
+                        SpecialSourceType source = this.GetSpecialSourceTypeFromString(value);
                         this.AddBinding(control, new Action(Config.action.setwindowsvolume, source));
                     }
                     else
                         this.parent.LogInfo("Action {0} can not be associated with slider!", action);
                 }else if (input.Name.Equals("button"))
                 {
-                    if (action.Contains("obsmute"))
+                    if (action == "obsmute")
                     {
-                        SpecialSourceType source = this.GetSpecialSourceTypeFromString(action.Split('(')[1].Split(')')[0]);
+                        SpecialSourceType source = this.GetSpecialSourceTypeFromString(value);
                         this.AddBinding(control, new Action(Config.action.obsmute, source));
                     }
-                    else if(action.Contains("switchscene"))
+                    else if(action == "switchscene")
                     {
-                        int index = Convert.ToInt32(action.Split('(')[1].Split(')')[0]);
+                        int index = Convert.ToInt32(value);
                         this.AddBinding(control, new Action(Config.action.switchscene, index));
                     }
-                    else if (action.Contains("windowsmute"))
+                    else if (action == "windowsmute")
                     {
-                        this.AddBinding(control, new Action(Config.action.windowsmute));
+                        this.AddBinding(control, new Action(Config.action.windowsmute, this.GetSpecialSourceTypeFromString(value)));
                     }
-                    else if (action.Contains("previoustrack"))
+                    else if (action == "previoustrack")
                     {
                         this.AddBinding(control, new Action(Config.action.previoustrack));
                     }
-                    else if (action.Contains("nexttrack"))
+                    else if (action == "nexttrack")
                     {
                         this.AddBinding(control, new Action(Config.action.nexttrack));
                     }
-                    else if (action.Contains("playpause"))
+                    else if (action == "playpause")
                     {
                         this.AddBinding(control, new Action(Config.action.playpause));
                     }
-                    else if (action.Contains("startstopstream"))
+                    else if (action == "startstopstream")
                     {
                         this.AddBinding(control, new Action(Config.action.startstopstream));
                     }
-                    else if (action.Contains("savereplay"))
+                    else if (action == "savereplay")
                     {
                         this.AddBinding(control, new Action(Config.action.savereplay));
                     }
@@ -155,7 +156,7 @@ namespace nanoKontrol2OBS
                 {
                     XmlNode source = output.Attributes.GetNamedItem("source");
                     if (source != null)
-                        this.outputbindings.Add(new Reaction(outputevent.obsmutechanged, control, GetSpecialSourceTypeFromString(source.Value)));
+                        this.outputbindings.Add(new Reaction(outputevent.obsmutechanged, control, this.GetSpecialSourceTypeFromString(source.Value)));
                     else
                         this.parent.LogInfo("Attribute 'source' has to be set for event {0}!", cause);
                 }
@@ -163,7 +164,7 @@ namespace nanoKontrol2OBS
                 {
                     XmlNode source = output.Attributes.GetNamedItem("source");
                     if (source != null)
-                        this.outputbindings.Add(new Reaction(outputevent.windowsmutechanged, control, GetSpecialSourceTypeFromString(source.Value)));
+                        this.outputbindings.Add(new Reaction(outputevent.windowsmutechanged, control, this.GetSpecialSourceTypeFromString(source.Value)));
                     else
                         this.parent.LogInfo("Attribute 'source' has to be set for event {0}!", cause);
                 }
