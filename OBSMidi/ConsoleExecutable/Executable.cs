@@ -54,7 +54,21 @@ namespace ConsoleExecutable
                 Console.WriteLine("obs-websocket address (Press enter for 127.0.0.1:4444):");
                 string ip = Console.ReadLine();
                 Console.WriteLine("Password (Press Enter if none):");
-                string password = Console.ReadLine();
+                ConsoleKeyInfo key;
+                string password = "";
+                do
+                {
+                    key = Console.ReadKey();
+                    if (key.Key == ConsoleKey.Backspace)
+                        password = password.Substring(0, (password.Length > 0) ? password.Length - 1 : 0);
+                    else if(key.Key != ConsoleKey.Enter)
+                        password += key.KeyChar;
+                    Console.SetCursorPosition(0, Console.CursorTop);
+                    Console.Write(new string(' ', password.Length + 1));
+                    Console.SetCursorPosition(0, Console.CursorTop);
+                    Console.Write(new string('*', password.Length));
+                } while (key.Key != ConsoleKey.Enter);
+                Console.Clear();
                 new Executable((ip == "") ? "127.0.0.1:4444" : ip, password);
             }
             else if (args.Length == 1)

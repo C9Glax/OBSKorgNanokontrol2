@@ -29,12 +29,13 @@ namespace TrayExecutable
         private void OnStatusChange(object sender, Kontrol2OBS.LogEventArgs e)
         {
             this.notifyIcon.BalloonTipText = e.text;
-            this.notifyIcon.ShowBalloonTip(2000);
+            this.notifyIcon.ShowBalloonTip(500);
         }
 
         private void toolStripClose_Click(object sender, EventArgs e)
         {
-            this.control.Dispose();
+            if(this.control != null)
+                this.control.Dispose();
             this.Close();
         }
 
@@ -48,15 +49,15 @@ namespace TrayExecutable
         private void toolStripPassword_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == '\b')
-                this.password = this.password.Substring(0, (this.password.Length > 1) ? this.password.Length - 1 : 0);
+                this.password = this.password.Substring(0, (this.password.Length > 0) ? this.password.Length - 1 : 0);
             else
                 this.password += e.KeyChar;
-            this.toolStripPassword.Text = new string('•', this.password.Length);
         }
 
         private void toolStripPassword_TextChanged(object sender, EventArgs e)
         {
             this.toolStripPassword.Text = new string('•', this.password.Length);
+            this.toolStripPassword.Select(this.toolStripPassword.TextLength, 0);
         }
     }
 }
