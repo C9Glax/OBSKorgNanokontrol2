@@ -17,6 +17,19 @@ The default config is my own preference. Different people might want different s
 
 The Binds-config has to be in the same folder as the executable and has to be named `config.xml`.
 
+The structure is as follows:
+```
+<?xml version="1.0" encoding="utf-8" ?>
+<config>
+  <inputs>
+
+  </inputs>
+  <outputs>
+
+  </outputs>
+</config>
+```
+
 ### inputs
 
 `inputs` can be	`slider`,`dial` or `button`. Each input consists of two attributes: `midicontrolid`&`action`.
