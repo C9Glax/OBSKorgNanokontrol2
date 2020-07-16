@@ -217,9 +217,14 @@ namespace nanoKontrol2OBS
                 if (specialSource.connected)
                 {
                     string pid = this.obsSocket.GetPIDOfAudioDevice(specialSource.obsSourceName);
-                    string guid = pid.Replace("}.{", "@").Split('@')[1].Substring(0, 36);
-                    specialSource.windowsDevice = new AudioDevice(guid);
-                    specialSource.windowsDevice.OnMuteStateChanged += WindowsDevice_OnMuteStateChanged;
+                    if(pid != "default")
+                    {
+                        string guid = pid.Replace("}.{", "@").Split('@')[1].Substring(0, 36);
+                        specialSource.windowsDevice = new AudioDevice(guid);
+                        specialSource.windowsDevice.OnMuteStateChanged += WindowsDevice_OnMuteStateChanged;
+                    }
+                    else
+                        this.LogWarning("Audio-source \"{0}\" is assigned per default. Window volume control will not be available, unless you set a specific Source.");
                 }
             }
         }
