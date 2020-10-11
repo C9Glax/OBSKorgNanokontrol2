@@ -278,7 +278,9 @@ namespace nanoKontrol2OBS
                 if (potentialName.ToLower().Contains("nano"))
                     return potentialName;
             this.LogWarning("Unable to find nanoKontrol device!");
-            return string.Empty;
+            foreach (string notNanoKontrol in MidiInformation.GetInputDevices())
+                this.LogWarning("Device: {0}", notNanoKontrol);
+           return string.Empty;
         }
 
         private string GetNanoKontrolOutputDeviceName()
@@ -287,6 +289,8 @@ namespace nanoKontrol2OBS
                 if (potentialName.ToLower().Contains("nano"))
                     return potentialName;
             this.LogWarning("Unable to find nanoKontrol device!");
+            foreach (string notNanoKontrol in MidiInformation.GetInputDevices())
+                this.LogWarning("Device: {0}", notNanoKontrol);
             return string.Empty;
         }
 
