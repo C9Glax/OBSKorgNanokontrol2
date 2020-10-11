@@ -46,7 +46,7 @@ namespace nanoKontrol2OBS
             this.UpdateLogStatus("Connecting nanoKontrol2...");
             this.nanoController = new Controller(GetNanoKontrolInputDeviceName(), GetNanoKontrolOutputDeviceName());
 
-            for (byte cc = 16; cc < 70; cc++)//Fancy Animation
+            for (byte cc = 16; cc < 70; cc++)//Fancy Animation (Seems like it also helps debugging stuff lol)
                 this.nanoController.ToggleLED(cc, false);
             for (byte cc = 16; cc < 70; cc++)
             {
@@ -224,7 +224,9 @@ namespace nanoKontrol2OBS
                         specialSource.windowsDevice.OnMuteStateChanged += WindowsDevice_OnMuteStateChanged;
                     }
                     else
-                        this.LogWarning("Audio-source \"{0}\" is assigned per default. Window volume control will not be available, unless you set a specific Source.");
+                    {
+                        this.LogWarning("Audio-source \"{0}\" is assigned per default. Windows volume control will not be available, unless you set a specific Source.");
+                    }
                 }
             }
         }
@@ -273,16 +275,18 @@ namespace nanoKontrol2OBS
         private string GetNanoKontrolInputDeviceName()
         {
             foreach(string potentialName in MidiInformation.GetInputDevices())
-                if (potentialName.Contains("nano"))
+                if (potentialName.ToLower().Contains("nano"))
                     return potentialName;
+            this.LogWarning("Unable to find nanoKontrol device!");
             return string.Empty;
         }
 
         private string GetNanoKontrolOutputDeviceName()
         {
             foreach (string potentialName in MidiInformation.GetOutputDevices())
-                if (potentialName.Contains("nano"))
+                if (potentialName.ToLower().Contains("nano"))
                     return potentialName;
+            this.LogWarning("Unable to find nanoKontrol device!");
             return string.Empty;
         }
 
