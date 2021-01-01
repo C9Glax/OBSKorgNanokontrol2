@@ -116,7 +116,7 @@ namespace nanoKontrol2OBS
         private void WindowsDevice_OnMuteStateChanged(object sender, AudioDevice.OnMuteStateChangedEventArgs e)
         {
             foreach (SpecialSourceObject potentialSender in this.specialSources.Values)
-                if (potentialSender.windowsDevice is null && potentialSender.windowsDevice.Equals(sender))
+                if (!(potentialSender.windowsDevice is null) && potentialSender.windowsDevice.Equals(sender))
                 {
                     if (potentialSender.specialSourceType.Equals(SpecialSourceType.desktop1))
                         this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.desktop1), e.muted);
@@ -140,20 +140,23 @@ namespace nanoKontrol2OBS
                 switch (operation.action)
                 {
                     case Config.action.nexttrack:
-                        keybd_event(0xB0, 0, 1, IntPtr.Zero);
+                        if (e.value == 127)
+                            keybd_event(0xB0, 0, 1, IntPtr.Zero);
                         break;
                     case Config.action.previoustrack:
-                        keybd_event(0xB1, 0, 1, IntPtr.Zero);
+                        if (e.value == 127)
+                            keybd_event(0xB1, 0, 1, IntPtr.Zero);
                         break;
                     case Config.action.playpause:
-                        keybd_event(0xB3, 0, 1, IntPtr.Zero);
+                        if (e.value == 127)
+                            keybd_event(0xB3, 0, 1, IntPtr.Zero);
                         break;
                     case Config.action.obsmute:
-                        if (this.specialSources[operation.source].connected)
+                        if (this.specialSources[operation.source].connected && e.value == 127)
                             this.obsSocket.ToggleMute(this.specialSources[operation.source].obsSourceName);
                         break;
                     case Config.action.windowsmute:
-                        if (this.specialSources[operation.source].connected)
+                        if (this.specialSources[operation.source].connected && e.value == 127)
                             this.specialSources[operation.source].windowsDevice.ToggleMute();
                         break;
                     case Config.action.setobsvolume:
@@ -165,15 +168,20 @@ namespace nanoKontrol2OBS
                             this.specialSources[operation.source].windowsDevice.SetVolume(Convert.ToDouble(e.value).Map(0, 127, 0, 100));
                         break;
                     case Config.action.savereplay:
-                        this.obsSocket.SaveReplayBuffer();
+                        if (e.value == 127)
+                            this.obsSocket.SaveReplayBuffer();
                         break;
                     case Config.action.startstopstream:
-                        this.obsSocket.StartStopStreaming();
+                        if (e.value == 127)
+                            this.obsSocket.StartStopStreaming();
                         break;
                     case Config.action.switchscene:
-                        Scene[] scenes = this.obsSocket.GetSceneList().scenes;
-                        if(operation.index <= scenes.Length)
-                            this.obsSocket.SetCurrentScene(scenes[operation.index].name);
+                        if (e.value == 127)
+                        {
+                            Scene[] scenes = this.obsSocket.GetSceneList().scenes;
+                            if (operation.index <= scenes.Length)
+                                this.obsSocket.SetCurrentScene(scenes[operation.index].name);
+                        }
                         break;
                 }
             }
