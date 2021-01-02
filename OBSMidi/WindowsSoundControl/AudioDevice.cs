@@ -14,6 +14,8 @@ namespace WindowsSoundControl
         public AudioDevice(string guid)
         {
             this.device = new CoreAudioController().GetDevice(Guid.Parse(guid));
+            if (this.device == null)
+                throw new Exception("Disconnected Audio-device in OBS-Settings. Exiting...");
 
             this.muteObserver = new MuteObserver(this);
             this.muteObserver.Subscribe(this.device.MuteChanged);
