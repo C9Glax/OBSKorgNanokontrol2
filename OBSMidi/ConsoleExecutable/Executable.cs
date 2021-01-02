@@ -8,11 +8,11 @@ namespace ConsoleExecutable
 
         public Executable(string url, string password)
         {
-            Kontrol2OBS control = new Kontrol2OBS(url, password);
-            control.OnStatusLog += (s, e) => { this.WriteLine(LogType.Status, e.text); };
-            control.OnWarningLog += (s, e) => { this.WriteLine(LogType.Warning, e.text); };
-            control.OnInfoLog += (s, e) => { this.WriteLine(LogType.Information, e.text); };
-            control.Create();
+            Kontrol2OBS control = new Kontrol2OBS(url, password,
+                (s,e) => { this.WriteLine(LogType.Status, e.text); },
+                (s, e) => { this.WriteLine(LogType.Warning, e.text); },
+                (s, e) => { this.WriteLine(LogType.Information, e.text); }
+            );
 
             this.WriteLine(LogType.Information, "Press Escape for clean shutdown.");
             while (Console.ReadKey().Key != ConsoleKey.Escape) ;

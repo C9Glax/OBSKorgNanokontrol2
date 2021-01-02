@@ -20,10 +20,13 @@ namespace TrayExecutable
             this.toolStripConnect.Enabled = false;
             this.toolStripClose.Enabled = false;
             string url = this.toolStripIP.Text;
-            this.control = new Kontrol2OBS(url, this.password);
-            this.control.OnStatusLog += OnStatusChange;
-            this.control.Create();
+            this.control = new Kontrol2OBS(url, this.password, this.OnStatusChange, this.OnLog, this.OnLog);
             this.toolStripClose.Enabled = true;
+        }
+
+        private void OnLog(object sender, Kontrol2OBS.LogEventArgs e)
+        {
+            //what to do?
         }
 
         private void OnStatusChange(object sender, Kontrol2OBS.LogEventArgs e)
