@@ -1,4 +1,8 @@
-﻿using System;
+﻿/*
+ * Class to control Windows-AudioDevices
+ */
+
+using System;
 using AudioSwitcher.AudioApi;
 using AudioSwitcher.AudioApi.CoreAudio;
 
@@ -11,6 +15,10 @@ namespace WindowsSoundControl
         private DateTime lastAction;
         private int maxDeviceActionsPerSecond = 50;
 
+        /*
+         * Creates controls for WindowsAudioDevice with GUID
+         * guid: GUID of the WindowsAudioDevice to control
+         */
         public AudioDevice(string guid)
         {
             this.device = new CoreAudioController().GetDevice(Guid.Parse(guid));
@@ -26,7 +34,7 @@ namespace WindowsSoundControl
         public void ToggleMute()
         {
             double timeelapsed = DateTime.Now.Subtract(this.lastAction).TotalMilliseconds;
-            if(timeelapsed > 1000 / this.maxDeviceActionsPerSecond)
+            if(timeelapsed > 1000 / this.maxDeviceActionsPerSecond) //There seems to be a maximum amount of actions per second. Trying to circumvent that...
             {
                 this.lastAction = DateTime.Now;
                 this.device.Mute(!this.device.IsMuted);
@@ -41,7 +49,7 @@ namespace WindowsSoundControl
         public void SetVolume(double volume)
         {
             double timeelapsed = DateTime.Now.Subtract(this.lastAction).TotalMilliseconds;
-            if (timeelapsed > 1000 / this.maxDeviceActionsPerSecond)
+            if (timeelapsed > 1000 / this.maxDeviceActionsPerSecond) //There seems to be a maximum amount of actions per second. Trying to circumvent that...
             {
                 this.lastAction = DateTime.Now;
                 this.device.Volume = volume;

@@ -118,8 +118,8 @@ namespace nanoKontrol2OBS
          */
         private void OnStreamStatusUpdate(object sender, OBSConnector.StreamStatusUpdateEventArgs e)
         {
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.streamstatuschanged), e.streaming);
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.replaystatuschanged), e.replayBufferActive);
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.streamstatuschanged), e.streaming);
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.replaystatuschanged), e.replayBufferActive);
         }
 
         /*
@@ -132,9 +132,9 @@ namespace nanoKontrol2OBS
             for (byte soloButtonIndex = 0; soloButtonIndex < this.obsScenes.Length && soloButtonIndex < 8; soloButtonIndex++)
             {
                 if (currentScene.Equals(this.obsScenes[soloButtonIndex]))
-                    this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.sceneswitched), true);
+                    this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.sceneswitched), true);
                 else
-                    this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.sceneswitched), false);
+                    this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.sceneswitched), false);
             }
         }
 
@@ -148,15 +148,15 @@ namespace nanoKontrol2OBS
                 if (potentialSender.obsSourceName.Equals(e.sourceName))
                 {
                     if (potentialSender.specialSourceType.Equals(SpecialSourceType.desktop1))
-                        this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.obsmutechanged, SpecialSourceType.desktop1), !e.muted);
+                        this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.obsmutechanged, SpecialSourceType.desktop1), !e.muted);
                     else if (potentialSender.specialSourceType.Equals(SpecialSourceType.desktop2))
-                        this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.obsmutechanged, SpecialSourceType.desktop2), !e.muted);
+                        this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.obsmutechanged, SpecialSourceType.desktop2), !e.muted);
                     else if (potentialSender.specialSourceType.Equals(SpecialSourceType.mic1))
-                        this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.obsmutechanged, SpecialSourceType.mic1), !e.muted);
+                        this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.obsmutechanged, SpecialSourceType.mic1), !e.muted);
                     else if (potentialSender.specialSourceType.Equals(SpecialSourceType.mic2))
-                        this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.obsmutechanged, SpecialSourceType.mic2), !e.muted);
+                        this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.obsmutechanged, SpecialSourceType.mic2), !e.muted);
                     else if (potentialSender.specialSourceType.Equals(SpecialSourceType.mic3))
-                        this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.obsmutechanged, SpecialSourceType.mic3), !e.muted);
+                        this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.obsmutechanged, SpecialSourceType.mic3), !e.muted);
                     break;
                 }
         }
@@ -171,15 +171,15 @@ namespace nanoKontrol2OBS
                 if (!(potentialSender.windowsDevice is null) && potentialSender.windowsDevice.Equals(sender))
                 {
                     if (potentialSender.specialSourceType.Equals(SpecialSourceType.desktop1))
-                        this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.desktop1), e.muted);
+                        this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.desktop1), e.muted);
                     else if (potentialSender.specialSourceType.Equals(SpecialSourceType.desktop2))
-                        this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.desktop2), e.muted);
+                        this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.desktop2), e.muted);
                     else if (potentialSender.specialSourceType.Equals(SpecialSourceType.mic1))
-                        this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.mic1), e.muted);
+                        this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.mic1), e.muted);
                     else if (potentialSender.specialSourceType.Equals(SpecialSourceType.mic2))
-                        this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.mic2), e.muted);
+                        this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.mic2), e.muted);
                     else if (potentialSender.specialSourceType.Equals(SpecialSourceType.mic3))
-                        this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.mic3), e.muted);
+                        this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.mic3), e.muted);
                     break;
                 }
         }
@@ -312,9 +312,9 @@ namespace nanoKontrol2OBS
             for (byte soloButtonIndex = 0; soloButtonIndex < this.obsScenes.Length && soloButtonIndex < 8; soloButtonIndex++)
             {
                 if (currentScene.Equals(this.obsScenes[soloButtonIndex]))
-                    this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.sceneswitched), true);
+                    this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.sceneswitched), true);
                 else
-                    this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.sceneswitched), false);
+                    this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.sceneswitched), false);
             }
 
             /*
@@ -322,24 +322,24 @@ namespace nanoKontrol2OBS
              * Read at own risk.
              */
 #pragma warning disable IDE0075
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.obsmutechanged, SpecialSourceType.desktop1),this.specialSources[SpecialSourceType.desktop1].connected ? !this.obsSocket.GetMute(this.specialSources[SpecialSourceType.desktop1].obsSourceName) : false);
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.obsmutechanged, SpecialSourceType.desktop2), this.specialSources[SpecialSourceType.desktop2].connected ? !this.obsSocket.GetMute(this.specialSources[SpecialSourceType.desktop2].obsSourceName) : false);
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.obsmutechanged, SpecialSourceType.mic1), this.specialSources[SpecialSourceType.mic1].connected ? !this.obsSocket.GetMute(this.specialSources[SpecialSourceType.mic1].obsSourceName) : false);
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.obsmutechanged, SpecialSourceType.mic2), this.specialSources[SpecialSourceType.mic2].connected ? !this.obsSocket.GetMute(this.specialSources[SpecialSourceType.mic2].obsSourceName) : false);
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.obsmutechanged, SpecialSourceType.mic3), this.specialSources[SpecialSourceType.mic3].connected ? !this.obsSocket.GetMute(this.specialSources[SpecialSourceType.mic3].obsSourceName) : false);
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.obsmutechanged, SpecialSourceType.desktop1),this.specialSources[SpecialSourceType.desktop1].connected ? !this.obsSocket.GetMute(this.specialSources[SpecialSourceType.desktop1].obsSourceName) : false);
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.obsmutechanged, SpecialSourceType.desktop2), this.specialSources[SpecialSourceType.desktop2].connected ? !this.obsSocket.GetMute(this.specialSources[SpecialSourceType.desktop2].obsSourceName) : false);
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.obsmutechanged, SpecialSourceType.mic1), this.specialSources[SpecialSourceType.mic1].connected ? !this.obsSocket.GetMute(this.specialSources[SpecialSourceType.mic1].obsSourceName) : false);
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.obsmutechanged, SpecialSourceType.mic2), this.specialSources[SpecialSourceType.mic2].connected ? !this.obsSocket.GetMute(this.specialSources[SpecialSourceType.mic2].obsSourceName) : false);
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.obsmutechanged, SpecialSourceType.mic3), this.specialSources[SpecialSourceType.mic3].connected ? !this.obsSocket.GetMute(this.specialSources[SpecialSourceType.mic3].obsSourceName) : false);
 
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.desktop1), this.specialSources[SpecialSourceType.desktop1].connected && this.specialSources[SpecialSourceType.desktop1].windowsDevice != null ? this.specialSources[SpecialSourceType.desktop1].windowsDevice.IsMuted() : false);
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.desktop2), this.specialSources[SpecialSourceType.desktop2].connected && this.specialSources[SpecialSourceType.desktop2].windowsDevice != null ? this.specialSources[SpecialSourceType.desktop2].windowsDevice.IsMuted() : false);
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.mic1), this.specialSources[SpecialSourceType.mic1].connected && this.specialSources[SpecialSourceType.mic1].windowsDevice != null ? this.specialSources[SpecialSourceType.mic1].windowsDevice.IsMuted() : false);
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.mic2), this.specialSources[SpecialSourceType.mic2].connected && this.specialSources[SpecialSourceType.mic2].windowsDevice != null ? this.specialSources[SpecialSourceType.mic2].windowsDevice.IsMuted() : false);
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.mic3), this.specialSources[SpecialSourceType.mic3].connected && this.specialSources[SpecialSourceType.mic3].windowsDevice != null ? this.specialSources[SpecialSourceType.mic3].windowsDevice.IsMuted() : false);
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.desktop1), this.specialSources[SpecialSourceType.desktop1].connected && this.specialSources[SpecialSourceType.desktop1].windowsDevice != null ? this.specialSources[SpecialSourceType.desktop1].windowsDevice.IsMuted() : false);
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.desktop2), this.specialSources[SpecialSourceType.desktop2].connected && this.specialSources[SpecialSourceType.desktop2].windowsDevice != null ? this.specialSources[SpecialSourceType.desktop2].windowsDevice.IsMuted() : false);
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.mic1), this.specialSources[SpecialSourceType.mic1].connected && this.specialSources[SpecialSourceType.mic1].windowsDevice != null ? this.specialSources[SpecialSourceType.mic1].windowsDevice.IsMuted() : false);
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.mic2), this.specialSources[SpecialSourceType.mic2].connected && this.specialSources[SpecialSourceType.mic2].windowsDevice != null ? this.specialSources[SpecialSourceType.mic2].windowsDevice.IsMuted() : false);
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.mic3), this.specialSources[SpecialSourceType.mic3].connected && this.specialSources[SpecialSourceType.mic3].windowsDevice != null ? this.specialSources[SpecialSourceType.mic3].windowsDevice.IsMuted() : false);
 #pragma warning restore IDE0075
 
             /*
              * Toggle LED on/off if stream is in-/active
              */
             GetStreamingStatusObject stats = this.obsSocket.GetStreamingStatus();
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.streamstatuschanged), stats.streaming);
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.streamstatuschanged), stats.streaming);
         }
 
         /*
@@ -347,10 +347,10 @@ namespace nanoKontrol2OBS
          */
         private void SetupOBSEventHandlers()
         {
-            this.obsSocket.OnStreamStarted += (s, e) => { this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.streamstatuschanged), true); };
-            this.obsSocket.OnStreamStopped += (s, e) => { this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.streamstatuschanged), false); };
-            this.obsSocket.OnReplayStarted += (s, e) => { this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.replaystatuschanged), true); };
-            this.obsSocket.OnReplayStopped += (s, e) => { this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.replaystatuschanged), false); };
+            this.obsSocket.OnStreamStarted += (s, e) => { this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.streamstatuschanged), true); };
+            this.obsSocket.OnStreamStopped += (s, e) => { this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.streamstatuschanged), false); };
+            this.obsSocket.OnReplayStarted += (s, e) => { this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.replaystatuschanged), true); };
+            this.obsSocket.OnReplayStopped += (s, e) => { this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.replaystatuschanged), false); };
             this.obsSocket.OnSourceMuteChanged += OnOBSSourceMuteChanged;
             this.obsSocket.OnSceneSwitched += OnSceneSwitched;
             this.obsSocket.OnStreamStatusUpdate += OnStreamStatusUpdate;

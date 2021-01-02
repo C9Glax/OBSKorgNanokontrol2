@@ -1,4 +1,7 @@
-﻿using NAudio.Midi;
+﻿/*
+ * Class for easier access to MIDI-Information, because the NAudio methods are... Not useful and unintuitive...
+ */
+using NAudio.Midi;
 
 namespace MidiAccess
 {
