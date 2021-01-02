@@ -140,13 +140,13 @@ namespace nanoKontrol2OBS
                 switch (operation.action)
                 {
                     case Config.action.nexttrack:
-                            keybd_event(0xB0, 0, 1, IntPtr.Zero);
+                        keybd_event(0xB0, 0, 1, IntPtr.Zero);
                         break;
                     case Config.action.previoustrack:
-                            keybd_event(0xB1, 0, 1, IntPtr.Zero);
+                        keybd_event(0xB1, 0, 1, IntPtr.Zero);
                         break;
                     case Config.action.playpause:
-                            keybd_event(0xB3, 0, 1, IntPtr.Zero);
+                        keybd_event(0xB3, 0, 1, IntPtr.Zero);
                         break;
                     case Config.action.obsmute:
                         if (this.specialSources[operation.source].connected)
@@ -165,15 +165,15 @@ namespace nanoKontrol2OBS
                             this.specialSources[operation.source].windowsDevice.SetVolume(Convert.ToDouble(e.value).Map(0, 127, 0, 100));
                         break;
                     case Config.action.savereplay:
-                            this.obsSocket.SaveReplayBuffer();
+                        this.obsSocket.SaveReplayBuffer();
                         break;
                     case Config.action.startstopstream:
-                            this.obsSocket.StartStopStreaming();
+                        this.obsSocket.StartStopStreaming();
                         break;
                     case Config.action.switchscene:
-                            Scene[] scenes = this.obsSocket.GetSceneList().scenes;
-                            if (operation.index <= scenes.Length)
-                                this.obsSocket.SetCurrentScene(scenes[operation.index].name);
+                        Scene[] scenes = this.obsSocket.GetSceneList().scenes;
+                        if (operation.index <= scenes.Length)
+                            this.obsSocket.SetCurrentScene(scenes[operation.index].name);
                         break;
                 }
             }
