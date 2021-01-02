@@ -112,7 +112,7 @@ namespace nanoKontrol2OBS
                     break;
                 }
         }
-
+        
         private void WindowsDevice_OnMuteStateChanged(object sender, AudioDevice.OnMuteStateChangedEventArgs e)
         {
             foreach (SpecialSourceObject potentialSender in this.specialSources.Values)
