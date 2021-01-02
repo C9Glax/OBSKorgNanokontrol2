@@ -66,14 +66,19 @@ namespace nanoKontrol2OBS
         public void Dispose()
         {
             this.UpdateLogStatus("Disposing...");
-            for (byte cc = 16; cc < 70; cc++)
-                this.nanoController.ToggleLED(cc, false);
-            this.obsSocket.Close();
+            if(this.nanoController != null)
+            {
+                for (byte cc = 16; cc < 70; cc++)
+                    this.nanoController.ToggleLED(cc, false);
+                this.nanoController.Dispose();
+            }
+            if(this.obsSocket != null)
+                this.obsSocket.Close();
             foreach (SpecialSourceObject specialSource in this.specialSources.Values)
-                if(specialSource.connected)
+                if(specialSource.connected && specialSource.windowsDevice != null)
                     specialSource.windowsDevice.Dispose();
-            this.nanoController.Dispose();
             this.UpdateLogStatus("Finished. Goodbye!");
+            System.Environment.Exit(0);
         }
 
         private void OnStreamStatusUpdate(object sender, OBSConnector.StreamStatusUpdateEventArgs e)
@@ -220,12 +225,23 @@ namespace nanoKontrol2OBS
                     if(pid != "default")
                     {
                         string guid = pid.Replace("}.{", "@").Split('@')[1].Substring(0, 36);
-                        specialSource.windowsDevice = new AudioDevice(guid);
-                        specialSource.windowsDevice.OnMuteStateChanged += WindowsDevice_OnMuteStateChanged;
+                        try
+                        {
+                            specialSource.windowsDevice = new AudioDevice(guid);
+                            specialSource.windowsDevice.OnMuteStateChanged += WindowsDevice_OnMuteStateChanged;
+                        }
+                        catch(Exception e)
+                        {
+                            this.LogWarning(e.Message);
+                        }
+                        finally
+                        {
+                            this.Dispose();
+                        }
                     }
                     else
                     {
-                        this.LogWarning("Audio-source \"{0}\" is assigned per default. Windows volume control will not be available, unless you set a specific Source.");
+                        this.LogWarning("Audio-source \"{0}\" is assigned per default by OBS. Windows volume control will not be available, unless you set a specific Source.", specialSource.obsSourceName);
                     }
                 }
             }
@@ -250,11 +266,11 @@ namespace nanoKontrol2OBS
             this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.obsmutechanged, SpecialSourceType.mic2), this.specialSources[SpecialSourceType.mic2].connected ? !this.obsSocket.GetMute(this.specialSources[SpecialSourceType.mic2].obsSourceName) : false);
             this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.obsmutechanged, SpecialSourceType.mic3), this.specialSources[SpecialSourceType.mic3].connected ? !this.obsSocket.GetMute(this.specialSources[SpecialSourceType.mic3].obsSourceName) : false);
 
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.desktop1), this.specialSources[SpecialSourceType.desktop1].connected ? this.specialSources[SpecialSourceType.desktop1].windowsDevice.IsMuted() : false);
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.desktop2), this.specialSources[SpecialSourceType.desktop2].connected ? this.specialSources[SpecialSourceType.desktop2].windowsDevice.IsMuted() : false);
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.mic1), this.specialSources[SpecialSourceType.mic1].connected ? this.specialSources[SpecialSourceType.mic1].windowsDevice.IsMuted() : false);
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.mic2), this.specialSources[SpecialSourceType.mic2].connected ? this.specialSources[SpecialSourceType.mic2].windowsDevice.IsMuted() : false);
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.mic3), this.specialSources[SpecialSourceType.mic3].connected ? this.specialSources[SpecialSourceType.mic3].windowsDevice.IsMuted() : false);
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.desktop1), this.specialSources[SpecialSourceType.desktop1].connected && this.specialSources[SpecialSourceType.desktop1].windowsDevice != null ? this.specialSources[SpecialSourceType.desktop1].windowsDevice.IsMuted() : false);
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.desktop2), this.specialSources[SpecialSourceType.desktop2].connected && this.specialSources[SpecialSourceType.desktop2].windowsDevice != null ? this.specialSources[SpecialSourceType.desktop2].windowsDevice.IsMuted() : false);
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.mic1), this.specialSources[SpecialSourceType.mic1].connected && this.specialSources[SpecialSourceType.mic1].windowsDevice != null ? this.specialSources[SpecialSourceType.mic1].windowsDevice.IsMuted() : false);
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.mic2), this.specialSources[SpecialSourceType.mic2].connected && this.specialSources[SpecialSourceType.mic2].windowsDevice != null ? this.specialSources[SpecialSourceType.mic2].windowsDevice.IsMuted() : false);
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.mic3), this.specialSources[SpecialSourceType.mic3].connected && this.specialSources[SpecialSourceType.mic3].windowsDevice != null ? this.specialSources[SpecialSourceType.mic3].windowsDevice.IsMuted() : false);
 #pragma warning restore IDE0075
 
             GetStreamingStatusObject stats = this.obsSocket.GetStreamingStatus();
