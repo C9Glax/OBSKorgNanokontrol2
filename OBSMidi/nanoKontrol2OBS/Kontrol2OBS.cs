@@ -140,23 +140,20 @@ namespace nanoKontrol2OBS
                 switch (operation.action)
                 {
                     case Config.action.nexttrack:
-                        if (e.value == 127)
                             keybd_event(0xB0, 0, 1, IntPtr.Zero);
                         break;
                     case Config.action.previoustrack:
-                        if (e.value == 127)
                             keybd_event(0xB1, 0, 1, IntPtr.Zero);
                         break;
                     case Config.action.playpause:
-                        if (e.value == 127)
                             keybd_event(0xB3, 0, 1, IntPtr.Zero);
                         break;
                     case Config.action.obsmute:
-                        if (this.specialSources[operation.source].connected && e.value == 127)
+                        if (this.specialSources[operation.source].connected)
                             this.obsSocket.ToggleMute(this.specialSources[operation.source].obsSourceName);
                         break;
                     case Config.action.windowsmute:
-                        if (this.specialSources[operation.source].connected && e.value == 127)
+                        if (this.specialSources[operation.source].connected)
                             this.specialSources[operation.source].windowsDevice.ToggleMute();
                         break;
                     case Config.action.setobsvolume:
@@ -168,20 +165,15 @@ namespace nanoKontrol2OBS
                             this.specialSources[operation.source].windowsDevice.SetVolume(Convert.ToDouble(e.value).Map(0, 127, 0, 100));
                         break;
                     case Config.action.savereplay:
-                        if (e.value == 127)
                             this.obsSocket.SaveReplayBuffer();
                         break;
                     case Config.action.startstopstream:
-                        if (e.value == 127)
                             this.obsSocket.StartStopStreaming();
                         break;
                     case Config.action.switchscene:
-                        if (e.value == 127)
-                        {
                             Scene[] scenes = this.obsSocket.GetSceneList().scenes;
                             if (operation.index <= scenes.Length)
                                 this.obsSocket.SetCurrentScene(scenes[operation.index].name);
-                        }
                         break;
                 }
             }
