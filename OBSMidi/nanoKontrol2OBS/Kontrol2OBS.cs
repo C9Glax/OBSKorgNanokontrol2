@@ -286,8 +286,10 @@ namespace nanoKontrol2OBS
                             specialSource.windowsDevice = new AudioDevice(guid);
                             specialSource.windowsDevice.OnMuteStateChanged += WindowsDevice_OnMuteStateChanged;
                         }
-                        catch(Exception e) { this.LogWarning(e.Message); }
-                        finally { this.Dispose(); }
+                        catch(Exception e) {
+                            this.LogWarning(e.Message);
+                            this.Dispose();
+                        }
                     }
                     else
                     {
