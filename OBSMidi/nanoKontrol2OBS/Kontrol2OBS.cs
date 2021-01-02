@@ -87,10 +87,10 @@ namespace nanoKontrol2OBS
             string currentScene = e.newSceneName;
             for (byte soloButtonIndex = 0; soloButtonIndex < this.obsScenes.Length && soloButtonIndex < 8; soloButtonIndex++)
             {
-                if (currentScene.Equals(this.obsScenes[soloButtonIndex]))
-                    this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.sceneswitched), true);
+                if (currentScene.Equals(this.obsScenes[soloButtonIndex].name))
+                    this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.sceneswitched,soloButtonIndex), true);
                 else
-                    this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.sceneswitched), false);
+                    this.nanoController.ToggleLED(this.bindingConfig.GetOutputToEvent(Config.outputevent.sceneswitched,soloButtonIndex), false);
             }
         }
 
