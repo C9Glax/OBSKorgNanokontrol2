@@ -3,6 +3,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using AudioSwitcher.AudioApi;
 using AudioSwitcher.AudioApi.CoreAudio;
 
@@ -12,8 +13,9 @@ namespace WindowsSoundControl
     {
         private readonly CoreAudioDevice device;
         private readonly MuteObserver muteObserver;
-        private DateTime lastAction;
-        private int maxDeviceActionsPerSecond = 50;
+
+        private Stack<double> volumeBuffer = new Stack<double>();
+        private bool mute;
 
         /*
          * Creates controls for WindowsAudioDevice with GUID
@@ -28,17 +30,12 @@ namespace WindowsSoundControl
             this.muteObserver = new MuteObserver(this);
             this.muteObserver.Subscribe(this.device.MuteChanged);
 
-            this.lastAction = DateTime.Now;
+            this.mute = this.IsMuted();
         }
 
         public void ToggleMute()
         {
-            double timeelapsed = DateTime.Now.Subtract(this.lastAction).TotalMilliseconds;
-            if(timeelapsed > 1000 / this.maxDeviceActionsPerSecond) //There seems to be a maximum amount of actions per second. Trying to circumvent that...
-            {
-                this.lastAction = DateTime.Now;
-                this.device.Mute(!this.device.IsMuted);
-            }
+            this.mute = !this.mute;
         }
 
         public bool IsMuted()
@@ -48,12 +45,16 @@ namespace WindowsSoundControl
 
         public void SetVolume(double volume)
         {
-            double timeelapsed = DateTime.Now.Subtract(this.lastAction).TotalMilliseconds;
-            if (timeelapsed > 1000 / this.maxDeviceActionsPerSecond) //There seems to be a maximum amount of actions per second. Trying to circumvent that...
-            {
-                this.lastAction = DateTime.Now;
-                this.device.Volume = volume;
-            }
+            this.volumeBuffer.Push(volume);
+        }
+
+        public void UpdateStatus()
+        {
+            this.device.Mute(mute);
+            while (this.volumeBuffer.Count > 1)
+                this.volumeBuffer.Pop();
+            if(this.volumeBuffer.Count > 0)
+                this.device.Volume = this.volumeBuffer.Pop();
         }
 
         public void Dispose()

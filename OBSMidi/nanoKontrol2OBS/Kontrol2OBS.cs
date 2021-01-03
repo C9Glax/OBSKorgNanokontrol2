@@ -36,6 +36,8 @@ namespace nanoKontrol2OBS
         private Scene[] obsScenes;
         private event LogEventHandler OnInfoLog, OnWarningLog, OnStatusLog;
 
+        private EventClock eventBuffer;
+
         /*
          * Complete Setup
          * url: location of obs-websocket (ip+port)
@@ -80,6 +82,7 @@ namespace nanoKontrol2OBS
             this.UpdateLogStatus("Setup Event Handlers...");
             this.SetupOBSEventHandlers();
 
+            this.eventBuffer = new EventClock(this, 200);
             this.UpdateLogStatus("Connected and Ready!");
         }
 
@@ -206,7 +209,7 @@ namespace nanoKontrol2OBS
                         break;
                     case Config.action.obsmute:
                         if (this.specialSources[operation.source].connected)
-                            this.obsSocket.ToggleMute(this.specialSources[operation.source].obsSourceName);
+                            this.eventBuffer.AddOBSEvent(this.obsSocket.ToggleMute, this.specialSources[operation.source].obsSourceName);
                         break;
                     case Config.action.windowsmute:
                         if (this.specialSources[operation.source].connected)
@@ -214,22 +217,22 @@ namespace nanoKontrol2OBS
                         break;
                     case Config.action.setobsvolume:
                         if (this.specialSources[operation.source].connected)
-                            this.obsSocket.SetVolume(this.specialSources[operation.source].obsSourceName, Convert.ToDouble(e.value).Map(0, 127, 0, 1));
+                            this.eventBuffer.AddOBSEvent(this.obsSocket.SetVolume, this.specialSources[operation.source].obsSourceName, Convert.ToDouble(e.value).Map(0, 127, 0, 1));
                         break;
                     case Config.action.setwindowsvolume:
                         if (this.specialSources[operation.source].connected)
                             this.specialSources[operation.source].windowsDevice.SetVolume(Convert.ToDouble(e.value).Map(0, 127, 0, 100));
                         break;
                     case Config.action.savereplay:
-                        this.obsSocket.SaveReplayBuffer();
+                        this.eventBuffer.AddOBSEvent(this.obsSocket.SaveReplayBuffer);
                         break;
                     case Config.action.startstopstream:
-                        this.obsSocket.StartStopStreaming();
+                        this.eventBuffer.AddOBSEvent(this.obsSocket.StartStopStreaming);
                         break;
                     case Config.action.switchscene:
                         Scene[] scenes = this.obsSocket.GetSceneList().scenes;
                         if (operation.index < scenes.Length)
-                            this.obsSocket.SetCurrentScene(scenes[operation.index].name);
+                            this.eventBuffer.AddOBSEvent(this.obsSocket.SetCurrentScene, scenes[operation.index].name);
                         break;
                 }
             }
