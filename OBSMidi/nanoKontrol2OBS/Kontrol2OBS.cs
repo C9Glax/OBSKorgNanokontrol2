@@ -172,7 +172,7 @@ namespace nanoKontrol2OBS
                         break;
                     case Config.action.switchscene:
                         Scene[] scenes = this.obsSocket.GetSceneList().scenes;
-                        if (operation.index <= scenes.Length)
+                        if (operation.index < scenes.Length)
                             this.obsSocket.SetCurrentScene(scenes[operation.index].name);
                         break;
                 }
