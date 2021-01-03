@@ -1,4 +1,8 @@
-﻿using OBSWebsocketSharp;
+﻿/*
+ * Loads/Verifies config.xml
+ */
+
+using OBSWebsocketSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -85,8 +89,14 @@ namespace nanoKontrol2OBS
             this.ImportConfig(config);
         }
 
+        /*
+         * Loads config and verifies syntax
+         */
         private void ImportConfig(XmlDocument config)
         {
+            /*
+             * Check what action has to be performed in case of input
+             */
             XmlNode inputs = config.GetElementsByTagName("inputs")[0];
             foreach(XmlNode input in inputs.ChildNodes)
             {
@@ -147,6 +157,9 @@ namespace nanoKontrol2OBS
                 }
             }
 
+            /*
+             * Load which LED to turn on/off
+             */
             XmlNode outputs = config.GetElementsByTagName("outputs")[0];
             foreach(XmlNode output in outputs.ChildNodes)
             {
@@ -189,6 +202,9 @@ namespace nanoKontrol2OBS
             }
         }
 
+        /*
+         * Add input-binds and check for duplicate bindings
+         */
         private void AddBinding(byte control, Action operation)
         {
             if (!this.inputbindings.ContainsKey(control))
@@ -198,22 +214,24 @@ namespace nanoKontrol2OBS
 
         }
 
-        public byte GetOutputToEvent(outputevent cause, SpecialSourceType source)
+        /*
+         * Returns the LED for a specific Event
+         */
+        public byte GetOutputForEvent(outputevent cause, SpecialSourceType source)
         {
             foreach(Reaction output in this.outputbindings)
                 if (cause == output.cause && source == output.source)
                     return output.control;
             return 0;
         }
-        public byte GetOutputToEvent(outputevent cause)
+        public byte GetOutputForEvent(outputevent cause)
         {
             foreach (Reaction output in this.outputbindings)
                 if (cause == output.cause)
                     return output.control;
             return 0;
         }
-
-        public byte GetOutputToEvent(outputevent cause, int sceneindex)
+        public byte GetOutputForEvent(outputevent cause, int sceneindex) //Not used atm, never know when you might need it...
         {
             foreach (Reaction output in this.outputbindings)
                 if (cause == output.cause && sceneindex == output.sceneindex)
@@ -242,6 +260,9 @@ namespace nanoKontrol2OBS
             }
         }
 
+        /*
+         * Load XML
+         */
         private XmlDocument LoadAndValidateConfig(string path)
         {
             XmlSchemaSet schemaset = new XmlSchemaSet();
@@ -265,7 +286,6 @@ namespace nanoKontrol2OBS
             catch (FileNotFoundException)
             {
                 this.parent.LogWarning("Configfile not found at {0}!", path);
-                this.parent.LogWarning("Configfile not found. ({0})", path);
             }
 
             XmlDocument xmlconfig = new XmlDocument
