@@ -31,6 +31,7 @@ namespace nanoKontrol2OBS
 
                         foreach (KeyValuePair<string, double> volumePair in this.obsVolume)
                             this.AddOBSEvent(() => { parent.obsSocket.SetVolume(volumePair.Key, volumePair.Value); });
+                        this.obsVolume.Clear();
 
                         Thread.Sleep(1000 / tickRate);
                     }
