@@ -23,7 +23,7 @@ namespace ConsoleExecutable
         private void WriteLine(LogType logtype, string text)
         {
             DateTime logtime = DateTime.Now;
-            string time = string.Format("{0}:{1}:{2}.{3}", logtime.Hour, logtime.Minute, logtime.Second, logtime.Millisecond);
+            string time = string.Format("{0}:{1}:{2}.{3}", zehner(logtime.Hour), zehner(logtime.Minute), zehner(logtime.Second), hunderter(logtime.Millisecond));
             string type;
             switch (logtype)
             {
@@ -75,6 +75,24 @@ namespace ConsoleExecutable
                 new Executable(args[0], "");
             else if (args.Length == 2)
                 new Executable(args[0], args[1]);
+        }
+
+        private static string zehner(int x)
+        {
+            if (x < 10)
+                return "0" + x;
+            else
+                return x.ToString();
+        }
+
+        private static string hunderter(int x)
+        {
+            if (x < 10)
+                return "00" + x;
+            else if (x < 100)
+                return "0" + x;
+            else
+                return x.ToString();
         }
     }
 }
