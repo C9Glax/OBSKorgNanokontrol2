@@ -1,4 +1,7 @@
-﻿using System;
+﻿/*
+ * Buffer to prevent overloading OBSWebsocket and WindowsAudio
+ */
+using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -8,28 +11,36 @@ namespace nanoKontrol2OBS
     {
         internal class EventClock
         {
-            private Stack<Delegate> OBSBuffer = new Stack<Delegate>();
-            private Stack<object[]> OBSBufferArguments = new Stack<object[]>();
+            private Dictionary<string, double> obsVolume;
+            private Queue<Action> obsBuffer = new Queue<Action>();
+            private List<string> volumeChanged;
+            private bool stop = false;
             public EventClock(Kontrol2OBS parent, int tickRate)
             {
+                this.obsVolume = new Dictionary<string, double>();
+                this.volumeChanged = new List<string>();
+                foreach (SpecialSourceObject source in parent.specialSources.Values)
+                    if (!this.obsVolume.ContainsKey(source.obsSourceName))
+                    {
+                        this.obsVolume.Add(source.obsSourceName, 0);
+                    }
+
                 Thread t = new Thread(() =>
                 {
-                    while (true)
+                    while (!stop)
                     {
-                        if (this.OBSBuffer.Count > 0)
-                            if (this.OBSBufferArguments.Peek().Length == 0)
-                            {
-                                this.OBSBuffer.Pop().DynamicInvoke();
-                                this.OBSBufferArguments.Pop();
-                            } else if (this.OBSBufferArguments.Peek().Length == 1)
-                                    this.OBSBuffer.Pop().DynamicInvoke(OBSBufferArguments.Pop()[0]);
-                            else if(this.OBSBufferArguments.Peek().Length == 2)
-                                    this.OBSBuffer.Pop().DynamicInvoke(OBSBufferArguments.Peek()[0], OBSBufferArguments.Pop()[1]);
+                        if (this.obsBuffer.Count > 0)
+                            this.obsBuffer.Dequeue().Invoke();
 
                         foreach (SpecialSourceObject specialSource in parent.specialSources.Values)
                             if(specialSource.windowsDevice != null)
                                 specialSource.windowsDevice.UpdateStatus();
-                        Thread.Sleep(tickRate);
+
+                        foreach(string source in this.volumeChanged)
+                            this.AddOBSEvent(() => { parent.obsSocket.SetVolume(source, this.obsVolume[source]); });
+                        this.volumeChanged.Clear();
+
+                        Thread.Sleep(1000 / tickRate);
                     }
                 });
                 t.Start();
@@ -37,20 +48,19 @@ namespace nanoKontrol2OBS
 
             public void AddOBSEvent(Action func)
             {
-                this.OBSBuffer.Push(func);
-                this.OBSBufferArguments.Push(new object[0]);
+                this.obsBuffer.Enqueue(func);
             }
 
-            public void AddOBSEvent(Action<string> func, string parameter)
+            public void SetOBSVolume(string source, double volume)
             {
-                this.OBSBuffer.Push(func);
-                this.OBSBufferArguments.Push(new object[]{ parameter });
+                this.obsVolume[source] = volume;
+                if(!this.volumeChanged.Contains(source))
+                    this.volumeChanged.Add(source);
             }
 
-            public void AddOBSEvent(Action<string, double> func, string parameter, double parameter2)
+            public void Dispose()
             {
-                this.OBSBuffer.Push(func);
-                this.OBSBufferArguments.Push(new object[] { parameter, parameter2 });
+                this.stop = true;
             }
         }
     }

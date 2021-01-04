@@ -82,7 +82,7 @@ namespace nanoKontrol2OBS
             this.UpdateLogStatus("Setup Event Handlers...");
             this.SetupOBSEventHandlers();
 
-            this.eventBuffer = new EventClock(this, 200);
+            this.eventBuffer = new EventClock(this, 20);
             this.UpdateLogStatus("Connected and Ready!");
         }
 
@@ -94,7 +94,10 @@ namespace nanoKontrol2OBS
         {
             this.UpdateLogStatus("Disposing...");
 
-            //Disconnect nanoKontrol2
+            //Stop sending to OBSWebsocket and WindowsAudio
+            this.eventBuffer.Dispose();
+
+            //Disconnect and turn off LEDs nanoKontrol2
             if(this.nanoController != null)
             {
                 for (byte cc = 16; cc < 70; cc++)
@@ -199,17 +202,19 @@ namespace nanoKontrol2OBS
                 switch (operation.action)
                 {
                     case Config.action.nexttrack:
-                        keybd_event(0xB0, 0, 1, IntPtr.Zero);
+                        keybd_event(0xB0, 0, 1, IntPtr.Zero); //Emulate keypress
                         break;
                     case Config.action.previoustrack:
-                        keybd_event(0xB1, 0, 1, IntPtr.Zero);
+                        keybd_event(0xB1, 0, 1, IntPtr.Zero); //Emulate keypress
                         break;
                     case Config.action.playpause:
-                        keybd_event(0xB3, 0, 1, IntPtr.Zero);
+                        keybd_event(0xB3, 0, 1, IntPtr.Zero); //Emulate keypress
                         break;
                     case Config.action.obsmute:
                         if (this.specialSources[operation.source].connected)
-                            this.eventBuffer.AddOBSEvent(this.obsSocket.ToggleMute, this.specialSources[operation.source].obsSourceName);
+                            this.eventBuffer.AddOBSEvent(() => {
+                                this.obsSocket.ToggleMute(this.specialSources[operation.source].obsSourceName);
+                            });
                         break;
                     case Config.action.windowsmute:
                         if (this.specialSources[operation.source].connected)
@@ -217,7 +222,7 @@ namespace nanoKontrol2OBS
                         break;
                     case Config.action.setobsvolume:
                         if (this.specialSources[operation.source].connected)
-                            this.eventBuffer.AddOBSEvent(this.obsSocket.SetVolume, this.specialSources[operation.source].obsSourceName, Convert.ToDouble(e.value).Map(0, 127, 0, 1));
+                            this.eventBuffer.SetOBSVolume(this.specialSources[operation.source].obsSourceName, Convert.ToDouble(e.value).Map(0, 127, 0, 1));
                         break;
                     case Config.action.setwindowsvolume:
                         if (this.specialSources[operation.source].connected)
@@ -232,7 +237,9 @@ namespace nanoKontrol2OBS
                     case Config.action.switchscene:
                         Scene[] scenes = this.obsSocket.GetSceneList().scenes;
                         if (operation.index < scenes.Length)
-                            this.eventBuffer.AddOBSEvent(this.obsSocket.SetCurrentScene, scenes[operation.index].name);
+                            this.eventBuffer.AddOBSEvent(() => {
+                                this.obsSocket.SetCurrentScene(scenes[operation.index].name);
+                            });
                         break;
                 }
             }
