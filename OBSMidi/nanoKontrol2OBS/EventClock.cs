@@ -13,17 +13,10 @@ namespace nanoKontrol2OBS
         {
             private Dictionary<string, double> obsVolume;
             private Queue<Action> obsBuffer = new Queue<Action>();
-            private List<string> volumeChanged;
             private bool stop = false;
             public EventClock(Kontrol2OBS parent, int tickRate)
             {
                 this.obsVolume = new Dictionary<string, double>();
-                this.volumeChanged = new List<string>();
-                foreach (SpecialSourceObject source in parent.specialSources.Values)
-                    if (!this.obsVolume.ContainsKey(source.obsSourceName))
-                    {
-                        this.obsVolume.Add(source.obsSourceName, 0);
-                    }
 
                 Thread t = new Thread(() =>
                 {
@@ -36,9 +29,8 @@ namespace nanoKontrol2OBS
                             if(specialSource.windowsDevice != null)
                                 specialSource.windowsDevice.UpdateStatus();
 
-                        foreach(string source in this.volumeChanged)
-                            this.AddOBSEvent(() => { parent.obsSocket.SetVolume(source, this.obsVolume[source]); });
-                        this.volumeChanged.Clear();
+                        foreach (KeyValuePair<string, double> volumePair in this.obsVolume)
+                            this.AddOBSEvent(() => { parent.obsSocket.SetVolume(volumePair.Key, volumePair.Value); });
 
                         Thread.Sleep(1000 / tickRate);
                     }
@@ -53,9 +45,10 @@ namespace nanoKontrol2OBS
 
             public void SetOBSVolume(string source, double volume)
             {
-                this.obsVolume[source] = volume;
-                if(!this.volumeChanged.Contains(source))
-                    this.volumeChanged.Add(source);
+                if (!this.obsVolume.ContainsKey(source))
+                    this.obsVolume.Add(source, volume);
+                else 
+                    this.obsVolume[source] = volume;
             }
 
             public void Dispose()
