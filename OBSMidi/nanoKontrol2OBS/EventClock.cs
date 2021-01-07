@@ -12,6 +12,7 @@ namespace nanoKontrol2OBS
         internal class EventClock
         {
             private Dictionary<string, double> obsVolume;
+            private bool dictLocked = false;
             private Queue<Action> obsBuffer = new Queue<Action>();
             private bool stop = false;
             public EventClock(Kontrol2OBS parent, int tickRate)
@@ -29,9 +30,11 @@ namespace nanoKontrol2OBS
                             if(specialSource.windowsDevice != null)
                                 specialSource.windowsDevice.UpdateStatus();
 
+                        this.dictLocked = true;
                         foreach (KeyValuePair<string, double> volumePair in this.obsVolume)
                             this.AddOBSEvent(() => { parent.obsSocket.SetVolume(volumePair.Key, volumePair.Value); });
                         this.obsVolume.Clear();
+                        this.dictLocked = false;
 
                         Thread.Sleep(1000 / tickRate);
                     }
@@ -46,6 +49,9 @@ namespace nanoKontrol2OBS
 
             public void SetOBSVolume(string source, double volume)
             {
+                while (this.dictLocked)
+                    Thread.Sleep(5);
+
                 if (!this.obsVolume.ContainsKey(source))
                     this.obsVolume.Add(source, volume);
                 else 
