@@ -54,20 +54,7 @@ namespace ConsoleExecutable
                 Console.WriteLine("obs-websocket address (Leave empty for 127.0.0.1:4444):");
                 string ip = Console.ReadLine();
                 Console.WriteLine("Password (Press Enter if none):");
-                ConsoleKeyInfo key;
-                string password = "";
-                do
-                {
-                    key = Console.ReadKey();
-                    if (key.Key == ConsoleKey.Backspace)
-                        password = password.Substring(0, (password.Length > 0) ? password.Length - 1 : 0);
-                    else if(key.Key != ConsoleKey.Enter)
-                        password += key.KeyChar;
-                    Console.SetCursorPosition(0, Console.CursorTop);
-                    Console.Write(new string(' ', password.Length + 1));
-                    Console.SetCursorPosition(0, Console.CursorTop);
-                    Console.Write(new string('*', password.Length));
-                } while (key.Key != ConsoleKey.Enter);
+                string password = EnterPassword();
                 Console.Clear();
                 new Executable((ip == "") ? "127.0.0.1:4444" : ip, password);
             }
@@ -75,6 +62,25 @@ namespace ConsoleExecutable
                 new Executable(args[0], "");
             else if (args.Length == 2)
                 new Executable(args[0], args[1]);
+        }
+
+        static string EnterPassword()
+        {
+            ConsoleKeyInfo key;
+            string password = "";
+            do
+            {
+                key = Console.ReadKey();
+                if (key.Key == ConsoleKey.Backspace)
+                    password = password.Substring(0, (password.Length > 0) ? password.Length - 1 : 0);
+                else if (key.Key != ConsoleKey.Enter)
+                    password += key.KeyChar;
+                Console.SetCursorPosition(0, Console.CursorTop);
+                Console.Write(new string(' ', password.Length + 1));
+                Console.SetCursorPosition(0, Console.CursorTop);
+                Console.Write(new string('*', password.Length));
+            } while (key.Key != ConsoleKey.Enter);
+            return password;
         }
     }
 }
