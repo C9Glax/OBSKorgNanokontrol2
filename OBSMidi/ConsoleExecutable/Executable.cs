@@ -23,7 +23,7 @@ namespace ConsoleExecutable
         private void WriteLine(LogType logtype, string text)
         {
             DateTime logtime = DateTime.Now;
-            string time = string.Format("{0}:{1}:{2}.{3}", tenner(logtime.Hour), tenner(logtime.Minute), tenner(logtime.Second), hundrid(logtime.Millisecond));
+            string time = string.Format("{0:D2}:{1:D2}:{2:D2}.{3:D3}", logtime.Hour, logtime.Minute, logtime.Second, logtime.Millisecond);
             string type;
             switch (logtype)
             {
@@ -51,7 +51,7 @@ namespace ConsoleExecutable
         {
             if (args.Length == 0)
             {
-                Console.WriteLine("obs-websocket address (Press enter for 127.0.0.1:4444):");
+                Console.WriteLine("obs-websocket address (Leave empty for 127.0.0.1:4444):");
                 string ip = Console.ReadLine();
                 Console.WriteLine("Password (Press Enter if none):");
                 ConsoleKeyInfo key;
@@ -75,24 +75,6 @@ namespace ConsoleExecutable
                 new Executable(args[0], "");
             else if (args.Length == 2)
                 new Executable(args[0], args[1]);
-        }
-
-        private static string tenner(int x)
-        {
-            if (x < 10)
-                return "0" + x;
-            else
-                return x.ToString();
-        }
-
-        private static string hundrid(int x)
-        {
-            if (x < 10)
-                return "00" + x;
-            else if (x < 100)
-                return "0" + x;
-            else
-                return x.ToString();
         }
     }
 }
