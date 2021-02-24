@@ -53,15 +53,20 @@ namespace ConsoleExecutable
             {
                 Console.WriteLine("obs-websocket address (Leave empty for 127.0.0.1:4444):");
                 string ip = Console.ReadLine();
-                Console.WriteLine("Password (Press Enter if none):");
+                Console.WriteLine("Password (Leave empty for none):");
                 string password = EnterPassword();
                 Console.Clear();
                 new Executable((ip == "") ? "127.0.0.1:4444" : ip, password);
             }
             else if (args.Length == 1)
-                new Executable(args[0], "");
+                if (args[0].Contains("-h") || args[0].Contains("--help"))
+                    PrintHelp();
+                else
+                    new Executable(args[0], "");
             else if (args.Length == 2)
                 new Executable(args[0], args[1]);
+            else
+                PrintHelp();
         }
 
         static string EnterPassword()
@@ -81,6 +86,11 @@ namespace ConsoleExecutable
                 Console.Write(new string('*', password.Length));
             } while (key.Key != ConsoleKey.Enter);
             return password;
+        }
+
+        static void PrintHelp()
+        {
+            Console.WriteLine("Usage:\nConsoleExecutable.exe [<ip:port> [password]]");
         }
     }
 }
