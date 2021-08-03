@@ -61,7 +61,6 @@
             // 
             // toolStripIP
             // 
-            this.toolStripIP.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.toolStripIP.MaxLength = 21;
             this.toolStripIP.Name = "toolStripIP";
             this.toolStripIP.RightToLeft = System.Windows.Forms.RightToLeft.No;
@@ -71,7 +70,6 @@
             // 
             // toolStripPassword
             // 
-            this.toolStripPassword.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.toolStripPassword.Name = "toolStripPassword";
             this.toolStripPassword.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.toolStripPassword.Size = new System.Drawing.Size(100, 23);
@@ -83,14 +81,14 @@
             // toolStripConnect
             // 
             this.toolStripConnect.Name = "toolStripConnect";
-            this.toolStripConnect.Size = new System.Drawing.Size(180, 22);
+            this.toolStripConnect.Size = new System.Drawing.Size(160, 22);
             this.toolStripConnect.Text = "Connect";
             this.toolStripConnect.Click += new System.EventHandler(this.toolStripConnect_Click);
             // 
             // toolStripClose
             // 
             this.toolStripClose.Name = "toolStripClose";
-            this.toolStripClose.Size = new System.Drawing.Size(180, 22);
+            this.toolStripClose.Size = new System.Drawing.Size(160, 22);
             this.toolStripClose.Text = "Close";
             this.toolStripClose.Click += new System.EventHandler(this.toolStripClose_Click);
             // 

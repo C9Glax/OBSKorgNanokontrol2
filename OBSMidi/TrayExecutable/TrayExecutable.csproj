@@ -57,10 +57,16 @@
     </Compile>
     <Compile Include="Executable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TrayForm1.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TrayForm.resx</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="TrayForm.resx">
       <DependentUpon>TrayForm.cs</DependentUpon>
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>TrayForm1.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
