@@ -17,10 +17,16 @@ namespace MidiAccess
          */
         public Controller(string inputDeviceName, string outputDeviceName)
         {
-            this.midiIn = MidiInformation.GetInputDeviceWithName(inputDeviceName);
+            try
+            {
+                this.midiIn = MidiInformation.GetInputDeviceWithName(inputDeviceName);
+                this.midiOut = MidiInformation.GetOutputDeviceWithName(outputDeviceName);
+            }catch (Exception e)
+            {
+                throw e;
+            }
             this.midiIn.Start();
             this.midiIn.MessageReceived += MessageReceived;
-            this.midiOut = MidiInformation.GetOutputDeviceWithName(outputDeviceName);
         }
 
         /*

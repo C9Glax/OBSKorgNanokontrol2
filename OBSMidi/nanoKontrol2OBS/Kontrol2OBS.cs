@@ -64,7 +64,13 @@ namespace nanoKontrol2OBS
             this.SetupAudio();
 
             this.UpdateLogStatus("Connecting nanoKontrol2...");
-            this.nanoController = new Controller(GetNanoKontrolInputDeviceName(), GetNanoKontrolOutputDeviceName());
+            try
+            {
+                this.nanoController = new Controller(GetNanoKontrolInputDeviceName(), GetNanoKontrolOutputDeviceName());
+            }catch (Exception e)
+            {
+                this.LogWarning("ERROR: {0}", e.Message);
+            }
 
             for (byte cc = 16; cc < 70; cc++)//Fancy Animation (Seems like it also helps debugging stuff lol)
                 this.nanoController.ToggleLED(cc, false);

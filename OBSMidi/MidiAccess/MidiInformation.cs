@@ -27,7 +27,7 @@ namespace MidiAccess
             for (int i = 0; i < MidiIn.NumberOfDevices; i++)
                 if (MidiIn.DeviceInfo(i).ProductName.Equals(name))
                     return new MidiIn(i);
-            return null;
+            throw new System.Exception(string.Format("Unable to find MIDI-Device with name {0}", name));
         }
 
         public static MidiOut GetOutputDeviceWithName(string name)
@@ -35,7 +35,7 @@ namespace MidiAccess
             for (int i = 0; i < MidiOut.NumberOfDevices; i++)
                 if (MidiOut.DeviceInfo(i).ProductName.Equals(name))
                     return new MidiOut(i);
-            return null;
+            throw new System.Exception(string.Format("Unable to find MIDI-Device with name {0}", name));
         }
     }
 }
