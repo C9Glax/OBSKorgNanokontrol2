@@ -48,7 +48,7 @@ namespace WindowsSoundControl
             this.volumeBuffer.Push(volume);
         }
 
-        public void UpdateStatus()
+        public void ExecuteChanges()
         {
             this.device.Mute(mute);
             while (this.volumeBuffer.Count > 1)

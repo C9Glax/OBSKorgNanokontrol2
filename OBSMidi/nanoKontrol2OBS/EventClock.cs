@@ -28,7 +28,7 @@ namespace nanoKontrol2OBS
 
                         foreach (SpecialSourceObject specialSource in parent.specialSources.Values)
                             if(specialSource.windowsDevice != null)
-                                specialSource.windowsDevice.UpdateStatus();
+                                specialSource.windowsDevice.ExecuteChanges();
 
                         foreach (KeyValuePair<string, double> volumePair in this.obsVolume)
                             this.AddOBSEvent(() => { parent.obsSocket.SetVolume(volumePair.Key, volumePair.Value); });
