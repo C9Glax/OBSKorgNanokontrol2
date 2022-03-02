@@ -11,6 +11,8 @@ Connect to [obs-websocket](https://github.com/Palakis/obs-websocket)
 
 A working [obs-websocket](https://github.com/Palakis/obs-websocket) installation.
 
+I highly suggest also installing the [KORG USB-MIDI Driver](https://www.korg.com/us/support/download/product/1/285/) to prevent issues with multiple programs trying to access the MIDI data.
+
 ## config.xml
 
 The default config is my own preference. Different people might want different setups. So here you go.
