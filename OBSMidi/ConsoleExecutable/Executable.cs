@@ -9,12 +9,12 @@ namespace ConsoleExecutable
         {
             if (args.Length == 0)
             {
-                Console.WriteLine("obs-websocket address (Leave empty for 127.0.0.1:4444):");
-                string ip = Console.ReadLine();
+                Console.WriteLine("obs-websocket address (Leave empty for 127.0.0.1:4455):");
+                string? ip = Console.ReadLine();
                 Console.WriteLine("Password (Leave empty for none):");
-                string password = EnterPassword();
+                string? password = Console.ReadLine();
                 Console.Clear();
-                new Executable((ip == "") ? "127.0.0.1:4444" : ip, password);
+                new Executable((ip ?? "") == "" ? "127.0.0.1:4455" : ip!, password ?? "");
             }
             else if (args.Length == 1)
                 if (args[0].Contains("-h") || args[0].Contains("--help"))
@@ -32,7 +32,8 @@ namespace ConsoleExecutable
             Kontrol2OBS control = new Kontrol2OBS(url, password,
                 (s,e) => { this.WriteLine(LogType.Status, e.text); },
                 (s, e) => { this.WriteLine(LogType.Warning, e.text); },
-                (s, e) => { this.WriteLine(LogType.Information, e.text); }
+                (s, e) => { this.WriteLine(LogType.Information, e.text); },
+                (s, e) => { this.WriteLine(LogType.Error, e.text); }
             );
 
             this.WriteLine(LogType.Information, "Press Escape for clean shutdown.");
@@ -40,7 +41,7 @@ namespace ConsoleExecutable
             control.Dispose();
         }
 
-        private enum LogType { Information, Warning, Status}
+        private enum LogType { Information, Warning, Status, Error}
         private void WriteLine(LogType logtype, string text)
         {
             DateTime logtime = DateTime.Now;
@@ -53,12 +54,16 @@ namespace ConsoleExecutable
                     typeString = "Info";
                     break;
                 case LogType.Warning:
-                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.ForegroundColor = ConsoleColor.Yellow;
                     typeString = "WARN";
                     break;
                 case LogType.Status:
                     Console.ForegroundColor = ConsoleColor.Cyan;
                     typeString = "Status";
+                    break;
+                case LogType.Error:
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    typeString = "ERROR";
                     break;
                 default:
                     Console.ForegroundColor = ConsoleColor.White;
@@ -66,30 +71,6 @@ namespace ConsoleExecutable
                     break;
             }
             Console.WriteLine("[{0}] ({1}) {2}", timeString, typeString, text);
-        }
-
-        /*
-         * Replaces entered characters with * 
-         */
-        static string EnterPassword()
-        {
-            ConsoleKeyInfo key;
-            string password = "";
-            do
-            {
-                key = Console.ReadKey();
-                if (key.Key == ConsoleKey.Backspace)
-                    password = password.Substring(0, (password.Length > 0) ? password.Length - 1 : 0);
-                else if (key.Key != ConsoleKey.Enter)
-                    password += key.KeyChar;
-                else
-                    throw new InvalidOperationException(string.Format("Operation {0} not supported.", key.ToString()));
-                Console.SetCursorPosition(0, Console.CursorTop);
-                Console.Write(new string(' ', password.Length + 1));
-                Console.SetCursorPosition(0, Console.CursorTop);
-                Console.Write(new string('*', password.Length));
-            } while (key.Key != ConsoleKey.Enter);
-            return password;
         }
 
         static void PrintHelp()
