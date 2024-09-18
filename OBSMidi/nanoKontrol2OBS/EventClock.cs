@@ -1,23 +1,21 @@
 ﻿/*
  * Buffer to prevent overloading OBSWebsocket and WindowsAudio
  */
-using System;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.Threading;
 
-namespace nanoKontrol2OBS
+using System.Collections.Concurrent;
+
+namespace Linker
 {
     partial class Kontrol2OBS
     {
         internal class EventClock
         {
-            private ConcurrentDictionary<string, double> obsVolume;
+            private ConcurrentDictionary<string, float> obsVolume;
             private Queue<Action> obsBuffer = new Queue<Action>();
             private bool stop = false;
             public EventClock(Kontrol2OBS parent, int tickRate)
             {
-                this.obsVolume = new ConcurrentDictionary<string, double>();
+                this.obsVolume = new ConcurrentDictionary<string, float>();
 
                 Thread t = new Thread(() =>
                 {
@@ -26,12 +24,11 @@ namespace nanoKontrol2OBS
                         if (this.obsBuffer.Count > 0)
                             this.obsBuffer.Dequeue().Invoke();
 
-                        foreach (SpecialSourceObject specialSource in parent.specialSources.Values)
-                            if(specialSource.windowsDevice != null)
-                                specialSource.windowsDevice.ExecuteChanges();
+                        foreach (SpecialSourceObject specialSource in parent.SpecialSources.Values)
+                            specialSource.AudioDevice.ExecuteChanges();
 
-                        foreach (KeyValuePair<string, double> volumePair in this.obsVolume)
-                            this.AddOBSEvent(() => { parent.obsSocket.SetVolume(volumePair.Key, volumePair.Value); });
+                        foreach (KeyValuePair<string, float> volumePair in this.obsVolume)
+                            this.AddOBSEvent(() => { parent.ObsSocket.SetInputVolume(volumePair.Key, volumePair.Value); });
                         this.obsVolume.Clear();
 
                         Thread.Sleep(1000 / tickRate);
@@ -45,7 +42,7 @@ namespace nanoKontrol2OBS
                 this.obsBuffer.Enqueue(func);
             }
 
-            public void SetOBSVolume(string source, double volume)
+            public void SetOBSVolume(string source, float volume)
             {
                 if (!this.obsVolume.ContainsKey(source))
                     while (!this.obsVolume.TryAdd(source, volume)) ;

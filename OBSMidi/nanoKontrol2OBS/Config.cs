@@ -2,14 +2,10 @@
  * Loads/Verifies config.xml
  */
 
-using OBSWebsocketSharp;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Xml;
 using System.Xml.Schema;
 
-namespace nanoKontrol2OBS
+namespace Linker
 {
     public class Config
     {
@@ -115,7 +111,7 @@ namespace nanoKontrol2OBS
                         this.AddBinding(control, new Action(Config.action.setwindowsvolume, source));
                     }
                     else
-                        this.parent.LogInfo("Action {0} can not be associated with slider!", action);
+                        this.parent.LogInfo($"Action {action} can not be associated with slider!");
                 }else if (input.Name.Equals("button"))
                 {
                     if (action == "obsmute")
@@ -153,7 +149,7 @@ namespace nanoKontrol2OBS
                         this.AddBinding(control, new Action(Config.action.savereplay));
                     }
                     else
-                        this.parent.LogInfo("Action {0} can not be associated with button!", action);
+                        this.parent.LogInfo($"Action {action} can not be associated with button!");
                 }
             }
 
@@ -171,7 +167,7 @@ namespace nanoKontrol2OBS
                     if (source != null)
                         this.outputbindings.Add(new Reaction(outputevent.obsmutechanged, control, this.GetSpecialSourceTypeFromString(source.Value)));
                     else
-                        this.parent.LogInfo("Attribute 'source' has to be set for event {0}!", cause);
+                        this.parent.LogInfo($"Attribute 'source' has to be set for event {cause}!");
                 }
                 else if (cause.Equals("windowsmutechanged"))
                 {
@@ -179,7 +175,7 @@ namespace nanoKontrol2OBS
                     if (source != null)
                         this.outputbindings.Add(new Reaction(outputevent.windowsmutechanged, control, this.GetSpecialSourceTypeFromString(source.Value)));
                     else
-                        this.parent.LogInfo("Attribute 'source' has to be set for event {0}!", cause);
+                        this.parent.LogInfo($"Attribute 'source' has to be set for event {cause}!");
                 }
                 else if (cause.Equals("streamstatuschanged"))
                 {
@@ -195,10 +191,10 @@ namespace nanoKontrol2OBS
                     if (sceneindex != null)
                         this.outputbindings.Add(new Reaction(outputevent.sceneswitched, control, Convert.ToInt32(sceneindex.Value)));
                     else
-                        this.parent.LogInfo("Attribute 'sceneindex' has to be set for event {0}!", cause);
+                        this.parent.LogInfo($"Attribute 'sceneindex' has to be set for event {cause}!");
                 }
                 else
-                    this.parent.LogInfo("Event {0} does not exist!", cause);
+                    this.parent.LogInfo($"Event {cause} does not exist!");
             }
         }
 
@@ -210,7 +206,7 @@ namespace nanoKontrol2OBS
             if (!this.inputbindings.ContainsKey(control))
                 this.inputbindings.Add(control, operation);
             else
-                this.parent.LogInfo("Control {0} is already bound!", control.ToString());
+                this.parent.LogInfo($"Control {control.ToString()} is already bound!");
 
         }
 
@@ -255,7 +251,7 @@ namespace nanoKontrol2OBS
                 case "mic3":
                     return SpecialSourceType.mic3;
                 default:
-                    this.parent.LogInfo("Source {0} is not a valid source.", source);
+                    this.parent.LogInfo($"Source {source} is not a valid source.");
                     return SpecialSourceType.desktop1;
             }
         }
@@ -266,7 +262,7 @@ namespace nanoKontrol2OBS
         private XmlDocument LoadAndValidateConfig(string path)
         {
             XmlSchemaSet schemaset = new XmlSchemaSet();
-            XmlReader xmlreader = XmlReader.Create(@".\config.xsd");
+            XmlReader xmlreader = XmlReader.Create(@"config.xsd");
             schemaset.Add("http://www.w3.org/2001/XMLSchema", xmlreader);
 
             XmlReaderSettings settings = new XmlReaderSettings()
@@ -285,7 +281,8 @@ namespace nanoKontrol2OBS
             }
             catch (FileNotFoundException)
             {
-                this.parent.LogWarning("Configfile not found at {0}!", path);
+                this.parent.LogError("$Configfile not found at {path}!");
+                Environment.Exit(-1);
             }
 
             XmlDocument xmlconfig = new XmlDocument

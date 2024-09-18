@@ -1,20 +1,14 @@
-﻿using WindowsSoundControl;
-using OBSWebsocketSharp;
+﻿using SoundControl;
 
-namespace nanoKontrol2OBS
+namespace Linker
 {
     partial class Kontrol2OBS
     {
-        internal class SpecialSourceObject
+        internal class SpecialSourceObject(string obsSourceName, AudioDevice audioDevice, bool connected)
         {
-            public SpecialSourceType specialSourceType;
-            public string obsSourceName;
-            public AudioDevice windowsDevice;
-            public bool connected;
-            public SpecialSourceObject(SpecialSourceType specialSourceType)
-            {
-                this.specialSourceType = specialSourceType;
-            }
+            public readonly string ObsSourceName = obsSourceName;
+            public readonly AudioDevice AudioDevice = audioDevice;
+            public readonly bool Connected = connected;
         }
     }
 }
