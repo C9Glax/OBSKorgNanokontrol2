@@ -30,10 +30,10 @@ namespace ConsoleExecutable
         public Executable(string url, string password)
         {
             Kontrol2OBS control = new Kontrol2OBS(url, password,
-                (s,e) => { this.WriteLine(LogType.Status, e.text); },
-                (s, e) => { this.WriteLine(LogType.Warning, e.text); },
-                (s, e) => { this.WriteLine(LogType.Information, e.text); },
-                (s, e) => { this.WriteLine(LogType.Error, e.text); }
+                (s,e) => { this.WriteLine(LogType.Status, e.Text); },
+                (s, e) => { this.WriteLine(LogType.Warning, e.Text); },
+                (s, e) => { this.WriteLine(LogType.Information, e.Text); },
+                (s, e) => { this.WriteLine(LogType.Error, e.Text); }
             );
 
             this.WriteLine(LogType.Information, "Press Escape for clean shutdown.");

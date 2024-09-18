@@ -24,11 +24,11 @@ namespace Linker
                         if (this.obsBuffer.Count > 0)
                             this.obsBuffer.Dequeue().Invoke();
 
-                        foreach (SpecialSourceObject specialSource in parent.specialSources.Values)
+                        foreach (SpecialSourceObject specialSource in parent.SpecialSources.Values)
                             specialSource.AudioDevice.ExecuteChanges();
 
                         foreach (KeyValuePair<string, float> volumePair in this.obsVolume)
-                            this.AddOBSEvent(() => { parent.obsSocket.SetInputVolume(volumePair.Key, volumePair.Value); });
+                            this.AddOBSEvent(() => { parent.ObsSocket.SetInputVolume(volumePair.Key, volumePair.Value); });
                         this.obsVolume.Clear();
 
                         Thread.Sleep(1000 / tickRate);

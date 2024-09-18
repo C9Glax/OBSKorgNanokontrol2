@@ -28,13 +28,13 @@ namespace Linker
     public partial class Kontrol2OBS
     {
         [DllImport("user32.dll")]
-        public static extern void keybd_event(byte virtualKey, byte scanCode, uint flags, IntPtr extraInfo);
-        private Config bindingConfig;
-        private OBSWebsocket obsSocket;
+        private static extern void keybd_event(byte virtualKey, byte scanCode, uint flags, IntPtr extraInfo);
+        private readonly Config bindingConfig;
+        internal readonly OBSWebsocket ObsSocket;
         private Controller nanoController;
-        private Dictionary<SpecialSourceType, SpecialSourceObject> specialSources;
+        internal Dictionary<SpecialSourceType, SpecialSourceObject> SpecialSources;
         private string[] obsSceneNames;
-        private event LogEventHandler OnInfoLog, OnWarningLog, OnStatusLog, onErrorLog;
+        private event LogEventHandler OnInfoLog, OnWarningLog, OnStatusLog, OnErrorLog;
 
         private EventClock eventBuffer;
 
@@ -44,26 +44,23 @@ namespace Linker
          * password: password
          * statusCallback: Method to call in case of a Status-Update
          * warningCallback: Method to call in case of a Warning-Message
-         * infoCallback: Method to call in case of a Info-Message
+         * infoCallback: Method to call in case of an Info-Message
          */
         public Kontrol2OBS(string url, string password, LogEventHandler statusCallback, LogEventHandler warningCallback, LogEventHandler infoCallback, LogEventHandler errorCallback)
         {
             this.OnStatusLog = statusCallback;
             this.OnWarningLog = warningCallback;
             this.OnInfoLog = infoCallback;
-            this.onErrorLog = errorCallback;
+            this.OnErrorLog = errorCallback;
             
             this.UpdateLogStatus("Loading Bindings...");
             this.bindingConfig = new Config(this, @"config.xml");
 
             this.UpdateLogStatus("Connecting to websocket...");
-            this.obsSocket = new OBSWebsocket();
-            this.obsSocket.Connected += (sender, args) =>
+            this.ObsSocket = new OBSWebsocket();
+            this.ObsSocket.Connected += (sender, _) =>
             {
-                OnStatusLog?.Invoke(sender, new LogEventArgs()
-                {
-                    text = "Websocket Connected"
-                });
+                OnStatusLog.Invoke(sender ?? this, new LogEventArgs("Websocket Connected"));
                 
                 this.UpdateLogStatus("Setting up audio (This might take a while)...");
                 this.SetupAudio();
@@ -99,15 +96,12 @@ namespace Linker
 
                 this.UpdateLogStatus("Connected and Ready!");
             };
-            this.obsSocket.Disconnected += (sender, info) =>
+            this.ObsSocket.Disconnected += (sender, info) =>
             {
-                OnStatusLog?.Invoke(sender, new LogEventArgs()
-                {
-                    text = $"Websocket Disconnected\n{info.DisconnectReason}"
-                });
+                OnStatusLog.Invoke(sender ?? this, new LogEventArgs($"Websocket Disconnected\n{info.DisconnectReason}"));
                 this.Dispose();
             };
-            this.obsSocket.ConnectAsync($"ws://{url}", password);
+            this.ObsSocket.ConnectAsync($"ws://{url}", password);
 
             
         }
@@ -120,10 +114,14 @@ namespace Linker
         {
             this.UpdateLogStatus("Disposing...");
 
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            // Is null on setup
             if(this.eventBuffer is not null)
             //Stop sending to OBSWebsocket and WindowsAudio
                 this.eventBuffer.Dispose();
 
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            // Is null on setup
             //Disconnect and turn off LEDs nanoKontrol2
             if (this.nanoController is not null)
             {
@@ -133,13 +131,15 @@ namespace Linker
             }
 
             //Disconnect from WebSocket
-            if(this.obsSocket.IsConnected)
-                this.obsSocket.Disconnect();
+            if(this.ObsSocket.IsConnected)
+                this.ObsSocket.Disconnect();
 
+            // ReSharper disable twice ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            // Is null on setup
             //Disconnect AudioDevices
-            if(this.specialSources is not null)
-                foreach (SpecialSourceObject specialSource in this.specialSources.Values)
-                    if(specialSource.Connected && specialSource.AudioDevice != null)
+            if(this.SpecialSources is not null)
+                foreach (SpecialSourceObject specialSource in this.SpecialSources.Values)
+                    if(specialSource is { Connected: true, AudioDevice: not null })
                         specialSource.AudioDevice.Dispose();
             
             this.UpdateLogStatus("Finished. Goodbye!");
@@ -152,7 +152,7 @@ namespace Linker
          */
         private void WindowsDevice_OnMuteStateChanged(object sender, bool muted)
         {
-            SpecialSourceType device = this.specialSources.FirstOrDefault(ss => ss.Value.AudioDevice.Equals(sender)).Key;
+            SpecialSourceType device = this.SpecialSources.FirstOrDefault(ss => ss.Value.AudioDevice.Equals(sender)).Key;
             this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.windowsmutechanged, device), muted);
         }
 
@@ -177,37 +177,37 @@ namespace Linker
                         keybd_event(0xB3, 0, 1, IntPtr.Zero); //Emulate keypress
                         break;
                     case Config.action.obsmute:
-                        if (this.specialSources[operation.source].Connected)
+                        if (this.SpecialSources[operation.source].Connected)
                             this.eventBuffer.AddOBSEvent(() => {
-                                this.obsSocket.ToggleInputMute(this.specialSources[operation.source].ObsSourceName);
+                                this.ObsSocket.ToggleInputMute(this.SpecialSources[operation.source].ObsSourceName);
                             });
                         break;
                     case Config.action.windowsmute:
-                        if (this.specialSources[operation.source].Connected)
-                            this.specialSources[operation.source].AudioDevice.ToggleMute();
+                        if (this.SpecialSources[operation.source].Connected)
+                            this.SpecialSources[operation.source].AudioDevice.ToggleMute();
                         break;
                     case Config.action.setobsvolume:
-                        if (this.specialSources[operation.source].Connected)
-                            this.eventBuffer.SetOBSVolume(this.specialSources[operation.source].ObsSourceName, Convert.ToSingle(e.value).Map(0, 127, 0, 1));
+                        if (this.SpecialSources[operation.source].Connected)
+                            this.eventBuffer.SetOBSVolume(this.SpecialSources[operation.source].ObsSourceName, Convert.ToSingle(e.value).Map(0, 127, 0, 1));
                         break;
                     case Config.action.setwindowsvolume:
-                        if (this.specialSources[operation.source].Connected)
-                            this.specialSources[operation.source].AudioDevice.SetVolume(Convert.ToSingle(e.value).Map(0, 127, 0, 100));
+                        if (this.SpecialSources[operation.source].Connected)
+                            this.SpecialSources[operation.source].AudioDevice.SetVolume(Convert.ToSingle(e.value).Map(0, 127, 0, 100));
                         break;
                     case Config.action.savereplay:
-                        this.eventBuffer.AddOBSEvent(this.obsSocket.SaveReplayBuffer);
+                        this.eventBuffer.AddOBSEvent(this.ObsSocket.SaveReplayBuffer);
                         break;
                     case Config.action.startstopstream:
                         this.eventBuffer.AddOBSEvent(() =>
                         {
-                            this.obsSocket.ToggleStream();
+                            this.ObsSocket.ToggleStream();
                         });
                         break;
                     case Config.action.switchscene:
-                        string[] scenes = this.obsSocket.GetSceneList().Scenes.Select(s => s.Name).ToArray();
+                        string[] scenes = this.ObsSocket.GetSceneList().Scenes.Select(s => s.Name).ToArray();
                         if (operation.index < scenes.Length)
                             this.eventBuffer.AddOBSEvent(() => {
-                                this.obsSocket.SetCurrentProgramScene(scenes[operation.index]);
+                                this.ObsSocket.SetCurrentProgramScene(scenes[operation.index]);
                             });
                         break;
                 }
@@ -220,48 +220,34 @@ namespace Linker
          */
         private void SetupAudio()
         {
-            Dictionary<string, string> specialInputs = this.obsSocket.GetSpecialInputs(); //Not very special actually...
+            Dictionary<string, string> specialInputs = this.ObsSocket.GetSpecialInputs().Where(i => i.Value is not null).ToDictionary(x => x.Key, x => x.Value); //Not very special actually...
 
-            this.specialSources = specialInputs.ToDictionary(si => Enum.Parse<SpecialSourceType>(si.Key), si =>
+            this.SpecialSources = specialInputs.ToDictionary(si => Enum.Parse<SpecialSourceType>(si.Key), si =>
             {
-                InputSettings inputSettings = this.obsSocket.GetInputSettings(si.Value);
-                LogInfo($"{si.Key} {si.Value}\n\t{inputSettings.InputKind}\n\t{inputSettings.Settings}");
+                InputSettings inputSettings = this.ObsSocket.GetInputSettings(si.Value);
                 AudioDevice audioDevice = AudioDevice.Default;
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                    audioDevice = new WindowsAudio("");//TODO Get GUID
+                Regex deviceIdRex = new Regex(@"{[0-9a-z\.\-]+}\.{([0-9a-z\-]+)}");
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && inputSettings.InputKind.Contains("wasapi"))
+                {
+                    string? deviceId = inputSettings.Settings.Value<string>("device_id");
+                    if (deviceId is null || !deviceIdRex.IsMatch(deviceId))
+                    {
+                        LogError("Missing or invalid device_id");
+                        LogError($"{si.Key} {si.Value}\n\t{inputSettings.InputKind}\n\t{inputSettings.Settings}");
+                        Environment.Exit(-1);
+                    }
+                    audioDevice = new WindowsAudio(deviceIdRex.Match(deviceId).Groups[1].Value);
+                }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                     audioDevice = new AlsaAudio(inputSettings.Settings.Value<string>("device_id")!); //TODO Check if ALSA
                 else
+                {
+                    LogError("Mismatch between device and Platform or unsupported.");
+                    LogError($"{si.Key} {si.Value}\n\t{inputSettings.InputKind}\n\t{inputSettings.Settings}");
                     Environment.Exit(-1);
+                }
                 return new SpecialSourceObject(si.Value, audioDevice, true); //TODO check connected
             });
-
-            /*
-            foreach (SpecialSourceObject specialSource in this.specialSources.Values)
-            {
-                specialSource.connected = connectedSpecialSources.Contains(specialSource.ObsSourceName);
-                if (specialSource.connected)
-                {
-                    string pid = this.obsSocket.GetPIDOfAudioDevice(specialSource.ObsSourceName);
-                    if(pid != "default") //OBS-"default"-assigned devices-PID is not transmitted by WebSocket. So we cant actually control their volume...
-                    {
-                        string guid = pid.Replace("}.{", "@").Split('@')[1].Substring(0, 36); //Convert the PID to GUID Format
-                        try //If the device is not actually connected
-                        {
-                            specialSource.windowsDevice = new AudioDevice(guid);
-                            specialSource.windowsDevice.OnMuteStateChanged += WindowsDevice_OnMuteStateChanged;
-                        }
-                        catch(Exception e) {
-                            this.LogWarning(e.Message);
-                            this.Dispose();
-                        }
-                    }
-                    else
-                    {
-                        this.LogWarning("Audio-source \"{0}\" is assigned per default by OBS. Windows volume control will not be available, unless you set a specific Source.", specialSource.ObsSourceName);
-                    }
-                }
-            }*/
         }
 
         /*
@@ -272,8 +258,8 @@ namespace Linker
             /*
              * Toggle LEDs on/off if OBS-Scene is active
              */
-            this.obsSceneNames = this.obsSocket.GetSceneList().Scenes.Select(s => s.Name).ToArray();
-            string currentScene = this.obsSocket.GetCurrentProgramScene();
+            this.obsSceneNames = this.ObsSocket.GetSceneList().Scenes.Select(s => s.Name).ToArray();
+            string currentScene = this.ObsSocket.GetCurrentProgramScene();
             for (byte soloButtonIndex = 0; soloButtonIndex < this.obsSceneNames.Length && soloButtonIndex < 8; soloButtonIndex++)
             {
                 if (currentScene.Equals(this.obsSceneNames[soloButtonIndex]))
@@ -287,23 +273,23 @@ namespace Linker
              * Read at own risk.
              */
 #pragma warning disable IDE0075
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.obsmutechanged, SpecialSourceType.desktop1),this.specialSources[SpecialSourceType.desktop1].Connected ? !this.obsSocket.GetInputMute(this.specialSources[SpecialSourceType.desktop1].ObsSourceName) : false);
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.obsmutechanged, SpecialSourceType.desktop2), this.specialSources[SpecialSourceType.desktop2].Connected ? !this.obsSocket.GetInputMute(this.specialSources[SpecialSourceType.desktop2].ObsSourceName) : false);
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.obsmutechanged, SpecialSourceType.mic1), this.specialSources[SpecialSourceType.mic1].Connected ? !this.obsSocket.GetInputMute(this.specialSources[SpecialSourceType.mic1].ObsSourceName) : false);
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.obsmutechanged, SpecialSourceType.mic2), this.specialSources[SpecialSourceType.mic2].Connected ? !this.obsSocket.GetInputMute(this.specialSources[SpecialSourceType.mic2].ObsSourceName) : false);
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.obsmutechanged, SpecialSourceType.mic3), this.specialSources[SpecialSourceType.mic3].Connected ? !this.obsSocket.GetInputMute(this.specialSources[SpecialSourceType.mic3].ObsSourceName) : false);
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.obsmutechanged, SpecialSourceType.desktop1),this.SpecialSources[SpecialSourceType.desktop1].Connected ? !this.ObsSocket.GetInputMute(this.SpecialSources[SpecialSourceType.desktop1].ObsSourceName) : false);
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.obsmutechanged, SpecialSourceType.desktop2), this.SpecialSources[SpecialSourceType.desktop2].Connected ? !this.ObsSocket.GetInputMute(this.SpecialSources[SpecialSourceType.desktop2].ObsSourceName) : false);
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.obsmutechanged, SpecialSourceType.mic1), this.SpecialSources[SpecialSourceType.mic1].Connected ? !this.ObsSocket.GetInputMute(this.SpecialSources[SpecialSourceType.mic1].ObsSourceName) : false);
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.obsmutechanged, SpecialSourceType.mic2), this.SpecialSources[SpecialSourceType.mic2].Connected ? !this.ObsSocket.GetInputMute(this.SpecialSources[SpecialSourceType.mic2].ObsSourceName) : false);
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.obsmutechanged, SpecialSourceType.mic3), this.SpecialSources[SpecialSourceType.mic3].Connected ? !this.ObsSocket.GetInputMute(this.SpecialSources[SpecialSourceType.mic3].ObsSourceName) : false);
 
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.desktop1), this.specialSources[SpecialSourceType.desktop1].Connected && this.specialSources[SpecialSourceType.desktop1].AudioDevice.IsMuted());
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.desktop2), this.specialSources[SpecialSourceType.desktop2].Connected && this.specialSources[SpecialSourceType.desktop2].AudioDevice.IsMuted());
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.mic1), this.specialSources[SpecialSourceType.mic1].Connected && this.specialSources[SpecialSourceType.mic1].AudioDevice.IsMuted());
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.mic2), this.specialSources[SpecialSourceType.mic2].Connected && this.specialSources[SpecialSourceType.mic2].AudioDevice.IsMuted());
-            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.mic3), this.specialSources[SpecialSourceType.mic3].Connected && this.specialSources[SpecialSourceType.mic3].AudioDevice.IsMuted());
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.desktop1), this.SpecialSources[SpecialSourceType.desktop1].Connected && this.SpecialSources[SpecialSourceType.desktop1].AudioDevice.IsMuted());
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.desktop2), this.SpecialSources[SpecialSourceType.desktop2].Connected && this.SpecialSources[SpecialSourceType.desktop2].AudioDevice.IsMuted());
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.mic1), this.SpecialSources[SpecialSourceType.mic1].Connected && this.SpecialSources[SpecialSourceType.mic1].AudioDevice.IsMuted());
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.mic2), this.SpecialSources[SpecialSourceType.mic2].Connected && this.SpecialSources[SpecialSourceType.mic2].AudioDevice.IsMuted());
+            this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.windowsmutechanged, SpecialSourceType.mic3), this.SpecialSources[SpecialSourceType.mic3].Connected && this.SpecialSources[SpecialSourceType.mic3].AudioDevice.IsMuted());
 #pragma warning restore IDE0075
 
             /*
              * Toggle LED on/off if stream is in-/active
              */
-            bool streaming = this.obsSocket.GetStreamStatus().IsActive;
+            bool streaming = this.ObsSocket.GetStreamStatus().IsActive;
             this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.streamstatuschanged), streaming);
         }
 
@@ -312,7 +298,7 @@ namespace Linker
          */
         private void SetupObsEventHandlers()
         {
-            this.obsSocket.StreamStateChanged += (sender, args) =>
+            this.ObsSocket.StreamStateChanged += (_, args) =>
             {
                 switch (args.OutputState.State)
                 {
@@ -327,7 +313,7 @@ namespace Linker
                 }
             };
 
-            this.obsSocket.ReplayBufferStateChanged += (sender, args) =>
+            this.ObsSocket.ReplayBufferStateChanged += (_, args) =>
             {
                 switch (args.OutputState.State)
                 {
@@ -342,8 +328,8 @@ namespace Linker
                 }
             };
 
-            this.obsSocket.InputMuteStateChanged += ObsSocketOnInputMuteStateChanged;
-            this.obsSocket.SceneNameChanged += ObsSocketOnSceneNameChanged;
+            this.ObsSocket.InputMuteStateChanged += ObsSocketOnInputMuteStateChanged;
+            this.ObsSocket.SceneNameChanged += ObsSocketOnSceneNameChanged;
         }
 
         private void ObsSocketOnSceneNameChanged(object? sender, SceneNameChangedEventArgs e)
@@ -360,32 +346,34 @@ namespace Linker
 
         private void ObsSocketOnInputMuteStateChanged(object? sender, InputMuteStateChangedEventArgs e)
         {
-            if (!this.specialSources.Any(ss => ss.Value.ObsSourceName.Equals(e.InputName)))
+            if (!this.SpecialSources.Any(ss => ss.Value.ObsSourceName.Equals(e.InputName)))
                 return;
 
-            SpecialSourceType t = this.specialSources.First(ss => ss.Value.ObsSourceName.Equals(e.InputName)).Key;
+            SpecialSourceType t = this.SpecialSources.First(ss => ss.Value.ObsSourceName.Equals(e.InputName)).Key;
             this.nanoController.ToggleLED(this.bindingConfig.GetOutputForEvent(Config.outputevent.obsmutechanged, t), e.InputMuted);
         }
 
         private string GetNanoKontrolInputDeviceName()
         {
-            foreach(string potentialName in MidiInformation.GetInputDevices())
-                if (potentialName.ToLower().Contains("nano"))
-                    return potentialName;
-            this.LogWarning("Unable to find nanoKontrol device!");
-            foreach (string notNanoKontrol in MidiInformation.GetInputDevices())
-                this.LogWarning($"Device: {notNanoKontrol}");
+            string? name = MidiInformation.GetInputDevices().FirstOrDefault(deviceName => deviceName.ToLower().Contains("nano"));
+            if (name is not null)
+                return name;
+            this.LogError("Unable to find nanoKontrol device!");
+            this.LogError("Have you installed the MIDI drivers and ran 'Install KORG USB-MIDI Device'?");
+            this.LogInfo($"Found devices:\n{string.Join("\n\t", MidiInformation.GetInputDevices())}");
+            Environment.Exit(-1);
             return string.Empty;
         }
 
         private string GetNanoKontrolOutputDeviceName()
         {
-            foreach (string potentialName in MidiInformation.GetOutputDevices())
-                if (potentialName.ToLower().Contains("nano"))
-                    return potentialName;
-            this.LogWarning("Unable to find nanoKontrol device!");
-            foreach (string notNanoKontrol in MidiInformation.GetInputDevices())
-                this.LogWarning($"Device: {notNanoKontrol}");
+            string? name = MidiInformation.GetOutputDevices().FirstOrDefault(deviceName => deviceName.ToLower().Contains("nano"));
+            if (name is not null)
+                return name;
+            this.LogError("Unable to find nanoKontrol device!");
+            this.LogError("Have you installed the MIDI drivers and ran 'Install KORG USB-MIDI Device'?");
+            this.LogInfo($"Found devices:\n{string.Join("\n\t", MidiInformation.GetOutputDevices())}");
+            Environment.Exit(-1);
             return string.Empty;
         }
         
@@ -393,45 +381,45 @@ namespace Linker
          * Custom EventHandler
          */
         public delegate void LogEventHandler(object sender, LogEventArgs e);
-        public class LogEventArgs : EventArgs
+        public class LogEventArgs (string text) : EventArgs 
         {
-            public string text;
+            public readonly string Text = text;
         }
 
         /*
          * Invokes a Warning-Message
          * Also takes care of formatting
          */
-        public void LogWarning(string format)
+        public void LogWarning(string text)
         {
-            this.OnWarningLog?.Invoke(this, new LogEventArgs() { text = format });
+            this.OnWarningLog.Invoke(this, new LogEventArgs(text));
         }
         
         /*
          * Invokes a Info-Message
          * Also takes care of formatting
          */
-        public void LogError(string format)
+        public void LogError(string text)
         {
-            this.onErrorLog?.Invoke(this, new LogEventArgs() { text = format });
+            this.OnErrorLog.Invoke(this, new LogEventArgs(text));
         }
 
         /*
          * Invokes a Info-Message
          * Also takes care of formatting
          */
-        public void LogInfo(string format)
+        public void LogInfo(string text)
         {
-            this.OnInfoLog?.Invoke(this, new LogEventArgs() { text = format });
+            this.OnInfoLog.Invoke(this, new LogEventArgs(text));
         }
 
         /*
          * Invokes a Status-Update
          * Also takes care of formatting
          */
-        public void UpdateLogStatus(string format)
+        public void UpdateLogStatus(string text)
         {
-            this.OnStatusLog?.Invoke(this, new LogEventArgs() { text = format });
+            this.OnStatusLog.Invoke(this, new LogEventArgs(text));
         }
     }
 }
