@@ -1,6 +1,6 @@
 ﻿using SoundControl;
 
-namespace nanoKontrol2OBS
+namespace Linker
 {
     partial class Kontrol2OBS
     {

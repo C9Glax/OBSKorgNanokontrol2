@@ -1,12 +1,10 @@
 ﻿/*
  * Buffer to prevent overloading OBSWebsocket and WindowsAudio
  */
-using System;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.Threading;
 
-namespace nanoKontrol2OBS
+using System.Collections.Concurrent;
+
+namespace Linker
 {
     partial class Kontrol2OBS
     {

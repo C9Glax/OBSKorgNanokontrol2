@@ -3,14 +3,15 @@
  * Tra and ConsoleExecutable both call here
  */
 
-using MidiAccess;
-using SoundControl;
-using OBSWebsocketDotNet;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
+using MidiAccess;
+using OBSWebsocketDotNet;
 using OBSWebsocketDotNet.Types;
 using OBSWebsocketDotNet.Types.Events;
+using SoundControl;
 
-namespace nanoKontrol2OBS
+namespace Linker
 {
     static class ExtensionMethod
     {

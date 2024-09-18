@@ -2,11 +2,10 @@
  * Loads/Verifies config.xml
  */
 
-using OBSWebsocketDotNet;
 using System.Xml;
 using System.Xml.Schema;
 
-namespace nanoKontrol2OBS
+namespace Linker
 {
     public class Config
     {

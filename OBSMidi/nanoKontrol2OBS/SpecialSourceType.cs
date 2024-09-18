@@ -1,4 +1,4 @@
-namespace nanoKontrol2OBS;
+namespace Linker;
 
 public enum SpecialSourceType
 {

@@ -1,5 +1,5 @@
 ﻿using System;
-using nanoKontrol2OBS;
+using Linker;
 
 namespace ConsoleExecutable
 {
