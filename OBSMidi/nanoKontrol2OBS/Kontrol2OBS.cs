@@ -177,21 +177,21 @@ namespace Linker
                         keybd_event(0xB3, 0, 1, IntPtr.Zero); //Emulate keypress
                         break;
                     case Config.action.obsmute:
-                        if (this.SpecialSources[operation.source].Connected)
+                        if (this.SpecialSources.ContainsKey(operation.source) && this.SpecialSources[operation.source].Connected)
                             this.eventBuffer.AddOBSEvent(() => {
                                 this.ObsSocket.ToggleInputMute(this.SpecialSources[operation.source].ObsSourceName);
                             });
                         break;
                     case Config.action.windowsmute:
-                        if (this.SpecialSources[operation.source].Connected)
+                        if (this.SpecialSources.ContainsKey(operation.source) && this.SpecialSources[operation.source].Connected)
                             this.SpecialSources[operation.source].AudioDevice.ToggleMute();
                         break;
                     case Config.action.setobsvolume:
-                        if (this.SpecialSources[operation.source].Connected)
+                        if (this.SpecialSources.ContainsKey(operation.source) && this.SpecialSources[operation.source].Connected)
                             this.eventBuffer.SetOBSVolume(this.SpecialSources[operation.source].ObsSourceName, Convert.ToSingle(e.value).Map(0, 127, 0, 1));
                         break;
                     case Config.action.setwindowsvolume:
-                        if (this.SpecialSources[operation.source].Connected)
+                        if (this.SpecialSources.ContainsKey(operation.source) && this.SpecialSources[operation.source].Connected)
                             this.SpecialSources[operation.source].AudioDevice.SetVolume(Convert.ToSingle(e.value).Map(0, 127, 0, 100));
                         break;
                     case Config.action.savereplay:
