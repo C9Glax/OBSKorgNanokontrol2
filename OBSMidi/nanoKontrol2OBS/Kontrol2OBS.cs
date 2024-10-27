@@ -238,9 +238,13 @@ namespace Linker
                         Environment.Exit(-1);
                     }
                     audioDevice = new WindowsAudio(deviceIdRex.Match(deviceId).Groups[1].Value);
+                    audioDevice.OnMuteStateChanged += WindowsDevice_OnMuteStateChanged;
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
                     audioDevice = new AlsaAudio(inputSettings.Settings.Value<string>("device_id")!); //TODO Check if ALSA
+                    audioDevice.OnMuteStateChanged += WindowsDevice_OnMuteStateChanged;
+                }
                 else
                 {
                     LogError("Mismatch between device and Platform or unsupported.");
