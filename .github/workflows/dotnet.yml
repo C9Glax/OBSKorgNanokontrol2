@@ -21,11 +21,11 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore OBSMidi/ConsoleExecutable/ConsoleExecutable.csproj
     - name: Build
-      run: dotnet build --no-restore OBSMidi/ConsoleExecutable/ConsoleExecutable.csproj -o build
+      run: dotnet publish --no-restore OBSMidi/ConsoleExecutable/ConsoleExecutable.csproj -o release
     - name: Archive Release
       uses: thedoctor0/zip-release@0.7.5
       with:
-        path: 'build'
+        path: 'release'
         type: 'zip'
         filename: 'release.zip'
         exclusions: '*.git* /*node_modules/* .editorconfig *.pdb'
