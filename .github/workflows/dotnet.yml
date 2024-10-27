@@ -21,7 +21,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore OBSMidi/ConsoleExecutable/ConsoleExecutable.csproj
     - name: Build
-      run: dotnet publish --no-restore OBSMidi/ConsoleExecutable/ConsoleExecutable.csproj -o release
+      run: dotnet publish --no-restore -r win-x64 OBSMidi/ConsoleExecutable/ConsoleExecutable.csproj -o release
     - name: Archive Release
       uses: thedoctor0/zip-release@0.7.5
       with:
