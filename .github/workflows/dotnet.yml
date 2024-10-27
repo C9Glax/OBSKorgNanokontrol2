@@ -19,9 +19,9 @@ jobs:
       with:
         dotnet-version: 8.0.x
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore OBSMidi/ConsoleExecutable/ConsoleExecutable.csproj
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build --no-restore OBSMidi/ConsoleExecutable/ConsoleExecutable.csproj
     - name: Archive Release
       uses: thedoctor0/zip-release@0.7.5
       with:
