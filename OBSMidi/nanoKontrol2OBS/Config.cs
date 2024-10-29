@@ -250,6 +250,8 @@ namespace Linker
                     return SpecialSourceType.mic2;
                 case "mic3":
                     return SpecialSourceType.mic3;
+                case "mic4":
+                    return SpecialSourceType.mic4;
                 default:
                     this.parent.LogInfo($"Source {source} is not a valid source.");
                     return SpecialSourceType.desktop1;
