@@ -6,5 +6,6 @@ public enum SpecialSourceType
     desktop2,
     mic1,
     mic2,
-    mic3
+    mic3,
+    mic4
 }
